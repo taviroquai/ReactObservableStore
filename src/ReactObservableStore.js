@@ -1,6 +1,17 @@
-import React, { Component } from 'react';
-import clone from 'lodash.clonedeep';
-import omit from 'lodash.omit';
+/*
+var React = require('react');
+var ReactObservableStore = React.createClass({
+	render () {
+		return <div>react-observable-store</div>;
+	}
+});
+export default ReactObservableStore;
+*/
+
+var React = require('react');
+var assign = require('lodash.assign');
+var clone = require('lodash.clonedeep');
+var omit = require('lodash.omit');
 
 /**
  * Example of usage in top level application:
@@ -52,10 +63,11 @@ const Store = (function () {
      * Method to update the storage data
      * @param  {Object} data The data to be stored
      */
-    function updateStore(data) {
-        storage = Object.assign(storage, sanitizeData(data));
+    function updateStore(data, merge = true) {
+        storage = merge ? assign(storage, sanitizeData(data))
+            : assign({}, sanitizeData(data));
         showLog && console && console.log('Store', storage);
-        fire('update', storage)
+        fire('update', storage);
     };
 
     /**
@@ -101,30 +113,29 @@ const Store = (function () {
 
     /**
      * Creates a wrapper around the component that will receive the storage data
-     * @param  {React.Component} ComposedComponent  The new component
+     * @param  {React.Component} WrappedComponent  The new component
      * @return {class}                              The resulting class
      */
-    var createComponent = (ComposedComponent) => {
+    const createObserver = (WrappedComponent) => {
 
         /**
          * Returns the component wrapper
          * @type {Object}
          */
-        return class extends Component {
+        return class extends React.Component {
             constructor(props) {
                 super(props);
 
-                this.name = Math.random().toString(36).substring(2);
-
-                // Creates the merged data
-                var merged = Object.assign({}, storage);
-                merged = Object.assign(merged, sanitizeData(props));
-
-                // Set the initial state
-                this.state = merged;
-
                 // Bind own methods
                 this.unsubscribe = this.unsubscribe.bind(this);
+
+                // Create component instance identifier
+                this.name = WrappedComponent.prototype.constructor.name
+                    + '_' + Math.random().toString(36).substring(2);
+
+                // Creates the merged data
+                this.merged = assign({}, storage);
+                this.merged = assign(this.merged, sanitizeData(props));
             }
 
             /**
@@ -133,7 +144,7 @@ const Store = (function () {
              */
             componentDidMount() {
                 var me = this;
-                subscribe('update', this.name, function cb (data) { me.update(data) });
+                subscribe('update', this.name, function updater(data) { me.update(data); });
             }
 
             /**
@@ -157,9 +168,11 @@ const Store = (function () {
              * @param  {Object} data The data to be updated
              */
             update(data, merge = true) {
-                const merged = merge ? Object.assign(this.state, sanitizeData(data))
+                this.merged = merge ? assign(this.merged, sanitizeData(data))
                     : sanitizeData(data);
-                this.setState(merged);
+
+                // Delegate updates to wrapped component
+                this.forceUpdate();
             }
 
             /**
@@ -176,10 +189,9 @@ const Store = (function () {
              * @return {String} The JSX string to be rendered by ReactDOM
              */
             render() {
-                return <ComposedComponent {...this.state}
-                    store={updateStore}
+                return (<WrappedComponent {...this.merged}
                     unsubscribe={unsubscribe}
-                />;
+                />);
             }
         };
     };
@@ -197,7 +209,7 @@ const Store = (function () {
 
         // Wraps the component with the store method
         withStore: (component) => {
-            return createComponent(component);
+            return createObserver(component);
         },
 
         // Updates the store
@@ -209,11 +221,9 @@ const Store = (function () {
         get: () => {
             return Object.assign({}, storage);
         }
-    }
+    };
 })();
 
 // Export public API
 export const withStore = Store.withStore;
-export const update = Store.update;
-export const get = Store.get;
-export default Store.init;
+export default Store;
