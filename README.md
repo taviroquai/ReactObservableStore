@@ -37,13 +37,13 @@ NOTE: known dependencies [bug](https://github.com/JedWatson/generator-react-comp
 ### Initialize (ES6) in top level component (or index.js)
 
 ```
-import Store from './Store';
-Store({ foo: 'bar' }, true);
+import Store from 'react-observable-store';
+Store.init({ foo: 'bar' }, true);
 ```
 
 ### Use the store (ES6) in sub level component (container recommended)
 ```
-import { withStore } from './Store';
+import { withStore } from 'react-observable-store';
 class MyComponent extends React.Component {};
 export default withStore(MyComponent);
 ```
