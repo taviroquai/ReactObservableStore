@@ -5,8 +5,6 @@ Because in some apps Redux is overkilling.
 This module uses the Observer Pattern: components subscribe to store updates.  
 Very simple API.  
 
-```
-
 ## Demo & Examples
 
 Live demo: [taviroquai.github.io/react-observable-store](http://taviroquai.github.io/react-observable-store/)
