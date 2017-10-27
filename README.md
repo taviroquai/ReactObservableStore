@@ -51,14 +51,12 @@ export default withStore(MyComponent);
 <p>foo: { this.props.foo }</p>
 ```
 
-### Update store from actions.js (recomended redux way)
+### Update store from actions.js (redux alike)
 ```
-Store.update({ foo: 'baz' });
-```
-
-### Update store from component where setState is allowed (not recomended)
-```
-this.props.store({ foo: 'baz' });
+import Store from 'react-observable-store';
+export const updateStore = (input) => {
+    Store.update({ foo: input });
+}
 ```
 
 ## Development (`src`, `lib` and the build process)
