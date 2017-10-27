@@ -1,4 +1,4 @@
-# react-observable-store
+# React Observable Store
 
 ## Why?
 Because in some apps Redux is overkilling.  

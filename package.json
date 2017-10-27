@@ -4,13 +4,13 @@
   "description": "Observable store for react components",
   "main": "lib/ReactObservableStore.js",
   "author": "Marco Afonso",
-  "homepage": "https://github.com/taviroquai/react-observable-store",
+  "homepage": "https://github.com/taviroquai/ReactObservableStore",
   "repository": {
     "type": "git",
-    "url": "https://github.com/taviroquai/react-observable-store.git"
+    "url": "https://github.com/taviroquai/ReactObservableStore.git"
   },
   "bugs": {
-    "url": "https://github.com/taviroquai/react-observable-store/issues"
+    "url": "https://github.com/taviroquai/ReactObservableStore/issues"
   },
   "dependencies": {
     "classnames": "^2.1.2",
