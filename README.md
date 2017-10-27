@@ -7,8 +7,6 @@ Very simple API.
 
 ## Demo & Examples
 
-Live demo: [taviroquai.github.io/react-observable-store](http://taviroquai.github.io/react-observable-store/)
-
 To build the examples locally, run:
 
 ```
