@@ -1,6 +1,6 @@
 {
   "name": "react-observable-store",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "react-observable-store",
   "main": "lib/ReactObservableStore.js",
   "author": "Marco Afonso",
