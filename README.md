@@ -27,7 +27,7 @@ You can also use the standalone build by including `dist/react-observable-store.
 npm install react-observable-store --save
 ```
 
-NOTE: known dependencies [bug](https://github.com/JedWatson/generator-react-component/issues/15)
+NOTE: known dev dependencies [bug](https://github.com/JedWatson/generator-react-component/issues/15)
 
 
 ## Usage
@@ -54,9 +54,9 @@ export default withStore(MyComponent);
 ### Update store from actions.js (redux alike)
 ```
 import Store from 'react-observable-store';
-export const updateStore = (input) => {
+export const updateFoo = (input) => {
     Store.update({ foo: input });
-}
+};
 ```
 
 ## Development (`src`, `lib` and the build process)
