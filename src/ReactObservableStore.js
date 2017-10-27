@@ -1,13 +1,3 @@
-/*
-var React = require('react');
-var ReactObservableStore = React.createClass({
-	render () {
-		return <div>react-observable-store</div>;
-	}
-});
-export default ReactObservableStore;
-*/
-
 var React = require('react');
 var assign = require('lodash.assign');
 var clone = require('lodash.clonedeep');
@@ -15,13 +5,16 @@ var omit = require('lodash.omit');
 
 /**
  * Example of usage in top level application:
- *  import Store from './Store';
- *  Store({ foo: 'bar' });
+ *  import Store from 'react-observable-store';
+ *  Store.init({ foo: 'bar' }, true);
  *
  * Example of usage in sub level component, ie. similar to redux connect usage:
- *  import { withStore } from './Store';
+ *  import { withStore } from 'react-observable-store';
  *  class MyComponent extends React.Component {};
  *  export default withStore(MyComponent);
+ *
+ * After this, the store data can be used in component like as any other props:
+ *  <p>{ this.props.foo }</p>
  */
 
 /**
