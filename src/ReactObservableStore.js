@@ -2,6 +2,7 @@ var React = require('react');
 var assign = require('lodash.assign');
 var clone = require('lodash.clonedeep');
 var omit = require('lodash.omit');
+var ObserverComponent = require('./ObserverComponent');
 
 /**
  * Example of usage in top level application:
@@ -111,82 +112,27 @@ const Store = (function () {
      */
     const createObserver = (WrappedComponent) => {
 
+        // Create component instance identifier
+        var observerName = (WrappedComponent.prototype.constructor.displayName
+            || WrappedComponent.prototype.constructor.name)
+            + '_' + Math.random().toString(36).substring(2);
+
         /**
          * Returns the component wrapper
          * @type {Object}
          */
-        return class extends React.Component {
-            constructor(props) {
-                super(props);
-
-                // Bind own methods
-                this.unsubscribe = this.unsubscribe.bind(this);
-
-                // Create component instance identifier
-                this.name = WrappedComponent.prototype.constructor.name
-                    + '_' + Math.random().toString(36).substring(2);
-
-                // Creates the merged data
-                this.merged = assign({}, storage);
-                this.merged = assign(this.merged, sanitizeData(props));
-            }
-
-            /**
-             * On component mount, subscribe to store updates
-             * @return {Boolean} The react result
-             */
-            componentDidMount() {
-                var me = this;
-                subscribe('update', this.name, function updater(data) { me.update(data); });
-            }
-
-            /**
-             * Update component state with new props
-             * @param  {[type]} nextProps [description]
-             * @return {[type]}           [description]
-             */
-            componentWillReceiveProps(nextProps) {
-                this.update(nextProps);
-            }
-
-            /**
-             * Unsubscribe observers of components that will unmount
-             */
-            componentWillUnmount() {
-                unsubscribe('update', this.name);
-            }
-
-            /**
-             * Update component state
-             * @param  {Object} data The data to be updated
-             */
-            update(data, merge = true) {
-                this.merged = merge ? assign(this.merged, sanitizeData(data))
-                    : sanitizeData(data);
-
-                // Delegate updates to wrapped component
-                this.forceUpdate();
-            }
-
-            /**
-             * Allows the component to unsubscribe to store updates
-             */
-            unsubscribe() {
-                unsubscribe((data) => this.update(data));
-            }
-
-            /**
-             * Renders the wrapper
-             * Allows the component to access the store update method
-             * and to unsubscribe to store store updates
-             * @return {String} The JSX string to be rendered by ReactDOM
-             */
-            render() {
-                return (<WrappedComponent {...this.merged}
-                    unsubscribe={unsubscribe}
-                />);
-            }
-        };
+        return (props) => (
+            <ObserverComponent
+                name={observerName}
+                input={props}
+                storage={storage}
+                sanitizeData={sanitizeData}
+                subscribe={subscribe}
+                unsubscribe={unsubscribe}
+                component={WrappedComponent}
+                >
+            </ObserverComponent>
+        )
     };
 
     /**
