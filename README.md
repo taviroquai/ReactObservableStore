@@ -27,9 +27,6 @@ You can also use the standalone build by including `dist/react-observable-store.
 npm install react-observable-store --save
 ```
 
-NOTE: known dev dependencies [bug](https://github.com/JedWatson/generator-react-component/issues/15)
-
-
 ## Usage
 
 ### Initialize (ES6) in top level component (or index.js)
@@ -61,6 +58,8 @@ export const updateFoo = (input) => {
 And... voilá! The component will reflect changes from store.
 
 ## Development (`src`, `lib` and the build process)
+
+NOTE: known dev dependencies [bug](https://github.com/JedWatson/generator-react-component/issues/15)  
 
 **NOTE:** The source code for the component is in `src`. A transpiled CommonJS version (generated with Babel) is available in `lib` for use with node.js, browserify and webpack. A UMD bundle is also built to `dist`, which can be included without the need for any build system.
 
