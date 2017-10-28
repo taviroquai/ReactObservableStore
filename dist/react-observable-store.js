@@ -3883,16 +3883,6 @@ module.exports = omit;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],4:[function(require,module,exports){
 (function (global){
-/*
-var React = require('react');
-var ReactObservableStore = React.createClass({
-	render () {
-		return <div>react-observable-store</div>;
-	}
-});
-export default ReactObservableStore;
-*/
-
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -3901,9 +3891,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x5, _x6, _x7) { var _again = true; _function: while (_again) { var object = _x5, property = _x6, receiver = _x7; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x5 = parent; _x6 = property; _x7 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -3911,18 +3899,129 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 
 var React = (typeof window !== "undefined" ? window['React'] : typeof global !== "undefined" ? global['React'] : null);
 var assign = require('lodash.assign');
+
+/**
+ * The observer component
+ * @type {Object}
+ */
+
+var ObserverComponent = (function (_React$Component) {
+    _inherits(ObserverComponent, _React$Component);
+
+    /**
+     * Observer constructor
+     * @param  {Object} props       Initialized ptops
+     * @return {React.component}    The component instance
+     */
+
+    function ObserverComponent(props) {
+        _classCallCheck(this, ObserverComponent);
+
+        _get(Object.getPrototypeOf(ObserverComponent.prototype), 'constructor', this).call(this, props);
+
+        // Create component instance identifier
+        this.id = props.name + '_' + Math.random().toString(36).substring(2);
+
+        // Creates the merged data
+        this.output = assign({}, props.storage[this.props.namespace]);
+        this.output = assign(this.output, props.sanitizeData(props.input));
+    }
+
+    /**
+     * On component mount, subscribe to store updates
+     * @return {Boolean} The react result
+     */
+
+    _createClass(ObserverComponent, [{
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var me = this;
+            this.props.subscribe(this.props.namespace, this.id, function updater(data) {
+                me.update(data);
+            });
+        }
+
+        /**
+         * Update component state with new props
+         * @param  {Object} nextProps The next props that will be received
+         */
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            this.update(nextProps.input);
+        }
+
+        /**
+         * Unsubscribe observers of components that will unmount
+         */
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            this.props.unsubscribe(this.props.namespace, this.id);
+        }
+
+        /**
+         * Update component state
+         * @param  {Object} data The data to be updated
+         */
+    }, {
+        key: 'update',
+        value: function update(data) {
+            var merge = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            this.output = merge ? assign(this.output, this.props.sanitizeData(data)) : this.props.sanitizeData(data);
+
+            // Delegate updates to wrapped component
+            this.forceUpdate();
+        }
+
+        /**
+         * Renders the wrapper
+         * Allows the component to access the store update method
+         * and to unsubscribe to store store updates
+         * @return {String} The JSX string to be rendered by ReactDOM
+         */
+    }, {
+        key: 'render',
+        value: function render() {
+            return React.createElement(this.props.component, this.output);
+        }
+    }]);
+
+    return ObserverComponent;
+})(React.Component);
+
+;
+
+exports['default'] = ObserverComponent;
+module.exports = exports['default'];
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"lodash.assign":1}],5:[function(require,module,exports){
+(function (global){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+var React = (typeof window !== "undefined" ? window['React'] : typeof global !== "undefined" ? global['React'] : null);
+var assign = require('lodash.assign');
 var clone = require('lodash.clonedeep');
 var omit = require('lodash.omit');
+var ObserverComponent = require('./ObserverComponent');
 
 /**
  * Example of usage in top level application:
- *  import Store from './Store';
- *  Store({ foo: 'bar' });
+ *  import Store from 'react-observable-store';
+ *  Store.init({ namespace: {foo: 'bar' }}, true);
  *
  * Example of usage in sub level component, ie. similar to redux connect usage:
- *  import { withStore } from './Store';
+ *  import { withStore } from 'react-observable-store';
  *  class MyComponent extends React.Component {};
- *  export default withStore(MyComponent);
+ *  export default withStore('namespace', MyComponent);
+ *
+ * After this, the store data can be used in component like as any other props:
+ *  <p>{ this.props.foo }</p>
  */
 
 /**
@@ -3947,9 +4046,14 @@ var Store = (function () {
      * The store observers
      * @type {Array}
      */
-    var observers = {
-        'update': {}
-    };
+    var observers = {};
+
+    /**
+     * Log current storage
+     */
+    function logging() {
+        showLog && console && console.log('Store', storage);
+    }
 
     /**
      * Sanitize allowed data to be stored, ie. only plain JS objects allowed
@@ -3962,168 +4066,111 @@ var Store = (function () {
 
     /**
      * Method to update the storage data
-     * @param  {Object} data The data to be stored
+     *
+     * @param {String} namespace    The namespace
+     * @param {Object} data         The data to be stored
+     * @param {Boolean} merge       The update method: merge or override
      */
-    function updateStore(data) {
-        var merge = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+    function updateStore(namespace, data) {
+        var merge = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 
-        storage = merge ? assign(storage, sanitizeData(data)) : assign({}, sanitizeData(data));
-        showLog && console && console.log('Store', storage);
-        fire('update', storage);
+        storage[namespace] = storage[namespace] || {};
+        observers[namespace] = observers[namespace] || {};
+        storage[namespace] = merge ? assign(storage[namespace], sanitizeData(data)) : assign({}, sanitizeData(data));
+        logging();
+        fire(namespace, storage[namespace]);
     };
 
     /**
      * Method to init the storage
-     * TODO: can be overriden
-     * @param  {Object} data The initial data to be stored
+     *
+     * @param {String} namespace   The namespace
+     * @param {Object} data        The initial data to be stored
      */
     function _init(data) {
         var log = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
         showLog = log;
-        updateStore(data);
+        storage = assign({}, sanitizeData(data));
+        logging();
     };
 
     /**
-     * Allow components to subscribe to store updates
-     * @param  {eventName}  eventName   The event name
-     * @param  {id}         The observer id
-     * @param  {Function} fn The component updater
+     * Get nested value
+     * @param  {String} key The nested key
+     * @return {Mixed}      The result
      */
-    function subscribe(eventName, id, fn) {
-        observers[eventName][id] = fn;
+    function getNested(key) {
+        var segments = key.split('.');
+        var result = storage;
+        segments.forEach(function (item) {
+            result = result[item];
+        });
+        return result === Object(result) ? assign({}, result) : result;
+    }
+
+    /**
+     * Allow components to subscribe to store updates
+     *
+     * @param {String}   namespace  The namespace
+     * @param {String}   id         The observer id
+     * @param {Function} fn         The component updater
+     */
+    function subscribe(namespace, id, fn) {
+        observers[namespace] = observers[namespace] || {};
+        observers[namespace][id] = fn;
     };
 
     /**
      * Allow components to unsubscribe to store updates
-     * @param  {eventName}  eventName    The event name
-     * @param  {id}         The observer id
+     *
+     * @param {String} namespace    The namespace
+     * @param {String} id           The observer id
      */
-    function _unsubscribe(eventName, id) {
-        observers[eventName] = omit(observers[eventName], [id]);
+    function unsubscribe(namespace, id) {
+        observers[namespace] = omit(observers[namespace], [id]);
     };
 
     /**
      * Call subscribers to store updates
-     * @param  {Object}  o       The event/data
-     * @param  {Boolean} thisObj The context
+     *
+     * @param {String}  namespace   The namespace
+     * @param {Object}  data        The event/data
+     * @param {Boolean} thisObj     The context
      */
-    function fire(eventName, o, thisObj) {
+    function fire(namespace, data, thisObj) {
         var scope = thisObj || window;
-        Object.keys(observers[eventName]).forEach(function (id) {
-            observers[eventName][id].call(scope, o);
+        Object.keys(observers[namespace]).forEach(function (id) {
+            observers[namespace][id].call(scope, data);
         });
     };
 
     /**
      * Creates a wrapper around the component that will receive the storage data
      * @param  {React.Component} WrappedComponent  The new component
-     * @return {class}                              The resulting class
+     * @return {React.Component}                   The resulting class
      */
-    var createObserver = function createObserver(WrappedComponent) {
+    var createObserver = function createObserver(namespace, WrappedComponent) {
+
+        // Get component class name
+        var name = WrappedComponent.prototype.constructor.displayName || WrappedComponent.prototype.constructor.name;
 
         /**
          * Returns the component wrapper
          * @type {Object}
          */
-        return (function (_React$Component) {
-            _inherits(_class, _React$Component);
-
-            function _class(props) {
-                _classCallCheck(this, _class);
-
-                _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props);
-
-                // Bind own methods
-                this.unsubscribe = this.unsubscribe.bind(this);
-
-                // Create component instance identifier
-                this.name = WrappedComponent.prototype.constructor.name + '_' + Math.random().toString(36).substring(2);
-
-                // Creates the merged data
-                this.merged = assign({}, storage);
-                this.merged = assign(this.merged, sanitizeData(props));
-            }
-
-            /**
-             * On component mount, subscribe to store updates
-             * @return {Boolean} The react result
-             */
-
-            _createClass(_class, [{
-                key: 'componentDidMount',
-                value: function componentDidMount() {
-                    var me = this;
-                    subscribe('update', this.name, function updater(data) {
-                        me.update(data);
-                    });
-                }
-
-                /**
-                 * Update component state with new props
-                 * @param  {[type]} nextProps [description]
-                 * @return {[type]}           [description]
-                 */
-            }, {
-                key: 'componentWillReceiveProps',
-                value: function componentWillReceiveProps(nextProps) {
-                    this.update(nextProps);
-                }
-
-                /**
-                 * Unsubscribe observers of components that will unmount
-                 */
-            }, {
-                key: 'componentWillUnmount',
-                value: function componentWillUnmount() {
-                    _unsubscribe('update', this.name);
-                }
-
-                /**
-                 * Update component state
-                 * @param  {Object} data The data to be updated
-                 */
-            }, {
-                key: 'update',
-                value: function update(data) {
-                    var merge = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-                    this.merged = merge ? assign(this.merged, sanitizeData(data)) : sanitizeData(data);
-
-                    // Delegate updates to wrapped component
-                    this.forceUpdate();
-                }
-
-                /**
-                 * Allows the component to unsubscribe to store updates
-                 */
-            }, {
-                key: 'unsubscribe',
-                value: function unsubscribe() {
-                    var _this = this;
-
-                    _unsubscribe(function (data) {
-                        return _this.update(data);
-                    });
-                }
-
-                /**
-                 * Renders the wrapper
-                 * Allows the component to access the store update method
-                 * and to unsubscribe to store store updates
-                 * @return {String} The JSX string to be rendered by ReactDOM
-                 */
-            }, {
-                key: 'render',
-                value: function render() {
-                    return React.createElement(WrappedComponent, _extends({}, this.merged, {
-                        unsubscribe: _unsubscribe
-                    }));
-                }
-            }]);
-
-            return _class;
-        })(React.Component);
+        return function (props) {
+            return React.createElement(ObserverComponent, {
+                name: name,
+                namespace: namespace,
+                input: props,
+                storage: storage,
+                sanitizeData: sanitizeData,
+                subscribe: subscribe,
+                unsubscribe: unsubscribe,
+                component: WrappedComponent
+            });
+        };
     };
 
     /**
@@ -4133,25 +4180,26 @@ var Store = (function () {
     return {
 
         // Initialize the store
-        init: function init(props) {
+        init: function init(data) {
             var log = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-            _init(props, log);
+            _init(data, log);
         },
 
         // Wraps the component with the store method
-        withStore: function withStore(component) {
-            return createObserver(component);
+        withStore: function withStore(namespace, component) {
+            return createObserver(namespace, component);
         },
 
         // Updates the store
-        update: function update(props) {
-            updateStore(props);
+        update: function update(namespace, props) {
+            updateStore(namespace, props);
         },
 
-        // Get the storage data as a cloned Object
-        get: function get() {
-            return _extends({}, storage);
+        // Get a nested storage value by key
+        // Levels separated by (.) dots
+        get: function get(key) {
+            return getNested(key);
         }
     };
 })();
@@ -4162,5 +4210,5 @@ exports.withStore = withStore;
 exports['default'] = Store;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"lodash.assign":1,"lodash.clonedeep":2,"lodash.omit":3}]},{},[4])(4)
+},{"./ObserverComponent":4,"lodash.assign":1,"lodash.clonedeep":2,"lodash.omit":3}]},{},[5])(5)
 });
