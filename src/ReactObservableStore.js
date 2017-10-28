@@ -7,12 +7,12 @@ var ObserverComponent = require('./ObserverComponent');
 /**
  * Example of usage in top level application:
  *  import Store from 'react-observable-store';
- *  Store.init({ foo: 'bar' }, true);
+ *  Store.init({ namespace: {foo: 'bar' }}, true);
  *
  * Example of usage in sub level component, ie. similar to redux connect usage:
  *  import { withStore } from 'react-observable-store';
  *  class MyComponent extends React.Component {};
- *  export default withStore(MyComponent);
+ *  export default withStore('namespace', MyComponent);
  *
  * After this, the store data can be used in component like as any other props:
  *  <p>{ this.props.foo }</p>
@@ -40,9 +40,14 @@ const Store = (function () {
      * The store observers
      * @type {Array}
      */
-    var observers = {
-        'update': {}
-    };
+    var observers = {};
+
+    /**
+     * Log current storage
+     */
+    function logging() {
+        showLog && console && console.log('Store', storage);
+    }
 
     /**
      * Sanitize allowed data to be stored, ie. only plain JS objects allowed
@@ -55,67 +60,92 @@ const Store = (function () {
 
     /**
      * Method to update the storage data
-     * @param  {Object} data The data to be stored
+     *
+     * @param {String} namespace    The namespace
+     * @param {Object} data         The data to be stored
+     * @param {Boolean} merge       The update method: merge or override
      */
-    function updateStore(data, merge = true) {
-        storage = merge ? assign(storage, sanitizeData(data))
+    function updateStore(namespace, data, merge = true) {
+        storage[namespace] = storage[namespace] || {};
+        observers[namespace] = observers[namespace] || {};
+        storage[namespace] = merge ? assign(storage[namespace], sanitizeData(data))
             : assign({}, sanitizeData(data));
-        showLog && console && console.log('Store', storage);
-        fire('update', storage);
+        logging();
+        fire(namespace, storage[namespace]);
     };
 
     /**
      * Method to init the storage
-     * TODO: can be overriden
-     * @param  {Object} data The initial data to be stored
+     *
+     * @param {String} namespace   The namespace
+     * @param {Object} data        The initial data to be stored
      */
     function init(data, log = false) {
         showLog = log;
-        updateStore(data);
+        storage = assign({}, sanitizeData(data));
+        logging();
     };
 
     /**
-     * Allow components to subscribe to store updates
-     * @param  {eventName}  eventName   The event name
-     * @param  {id}         The observer id
-     * @param  {Function} fn The component updater
+     * Get nested value
+     * @param  {String} key The nested key
+     * @return {Mixed}      The result
      */
-    function subscribe(eventName, id, fn) {
-        observers[eventName][id] = fn;
+    function getNested(key) {
+        var segments = key.split('.');
+        var result = storage;
+        segments.forEach((item) => {
+            result = result[item];
+        })
+        return result === Object(result) ? assign({}, result) : result;
+    }
+
+    /**
+     * Allow components to subscribe to store updates
+     *
+     * @param {String}   namespace  The namespace
+     * @param {String}   id         The observer id
+     * @param {Function} fn         The component updater
+     */
+    function subscribe(namespace, id, fn) {
+        observers[namespace] = observers[namespace] || {};
+        observers[namespace][id] = fn;
     };
 
     /**
      * Allow components to unsubscribe to store updates
-     * @param  {eventName}  eventName    The event name
-     * @param  {id}         The observer id
+     *
+     * @param {String} namespace    The namespace
+     * @param {String} id           The observer id
      */
-    function unsubscribe(eventName, id) {
-        observers[eventName] = omit(observers[eventName], [id]);
+    function unsubscribe(namespace, id) {
+        observers[namespace] = omit(observers[namespace], [id]);
     };
 
     /**
      * Call subscribers to store updates
-     * @param  {Object}  o       The event/data
-     * @param  {Boolean} thisObj The context
+     *
+     * @param {String}  namespace   The namespace
+     * @param {Object}  data        The event/data
+     * @param {Boolean} thisObj     The context
      */
-    function fire(eventName, o, thisObj) {
+    function fire(namespace, data, thisObj) {
         var scope = thisObj || window;
-        Object.keys(observers[eventName]).forEach((id) => {
-            observers[eventName][id].call(scope, o);
+        Object.keys(observers[namespace]).forEach((id) => {
+            observers[namespace][id].call(scope, data);
         });
     };
 
     /**
      * Creates a wrapper around the component that will receive the storage data
      * @param  {React.Component} WrappedComponent  The new component
-     * @return {class}                              The resulting class
+     * @return {React.Component}                   The resulting class
      */
-    const createObserver = (WrappedComponent) => {
+    const createObserver = (namespace, WrappedComponent) => {
 
-        // Create component instance identifier
-        var observerName = (WrappedComponent.prototype.constructor.displayName
-            || WrappedComponent.prototype.constructor.name)
-            + '_' + Math.random().toString(36).substring(2);
+        // Get component class name
+        var name = (WrappedComponent.prototype.constructor.displayName
+            || WrappedComponent.prototype.constructor.name);
 
         /**
          * Returns the component wrapper
@@ -123,7 +153,8 @@ const Store = (function () {
          */
         return (props) => (
             <ObserverComponent
-                name={observerName}
+                name={name}
+                namespace={namespace}
                 input={props}
                 storage={storage}
                 sanitizeData={sanitizeData}
@@ -142,23 +173,24 @@ const Store = (function () {
     return {
 
         // Initialize the store
-        init: (props, log = false) => {
-            init(props, log);
+        init: (data, log = false) => {
+            init(data, log);
         },
 
         // Wraps the component with the store method
-        withStore: (component) => {
-            return createObserver(component);
+        withStore: (namespace, component) => {
+            return createObserver(namespace, component);
         },
 
         // Updates the store
-        update: (props) => {
-            updateStore(props);
+        update: (namespace, props) => {
+            updateStore(namespace, props);
         },
 
-        // Get the storage data as a cloned Object
-        get: () => {
-            return Object.assign({}, storage);
+        // Get a nested storage value by key
+        // Levels separated by (.) dots
+        get: (key) => {
+            return getNested(key);
         }
     };
 })();

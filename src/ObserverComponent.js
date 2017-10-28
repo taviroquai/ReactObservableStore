@@ -15,8 +15,11 @@ class ObserverComponent extends React.Component {
     constructor(props) {
         super(props);
 
+        // Create component instance identifier
+        this.id = props.name + '_' + Math.random().toString(36).substring(2);
+
         // Creates the merged data
-        this.output = assign({}, props.storage);
+        this.output = assign({}, props.storage[this.props.namespace]);
         this.output = assign(this.output, props.sanitizeData(props.input));
     }
 
@@ -26,7 +29,11 @@ class ObserverComponent extends React.Component {
      */
     componentDidMount() {
         var me = this;
-        this.props.subscribe('update', this.props.name, function updater(data) { me.update(data); });
+        this.props.subscribe(
+            this.props.namespace,
+            this.id,
+            function updater(data) { me.update(data); }
+        );
     }
 
     /**
@@ -41,7 +48,7 @@ class ObserverComponent extends React.Component {
      * Unsubscribe observers of components that will unmount
      */
     componentWillUnmount() {
-        this.props.unsubscribe('update', this.props.name);
+        this.props.unsubscribe(this.props.namespace, this.id);
     }
 
     /**

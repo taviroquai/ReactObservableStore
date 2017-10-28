@@ -36,14 +36,14 @@ NOTE: known dev dependencies [bug](https://github.com/JedWatson/generator-react-
 
 ```
 import Store from 'react-observable-store';
-Store.init({ foo: 'bar' }, true);
+Store.init({ namespace: {foo: 'bar' }}, true);
 ```
 
 ### Use the store (ES6) in sub level component (container recommended)
 ```
 import { withStore } from 'react-observable-store';
 class MyComponent extends React.Component {};
-export default withStore(MyComponent);
+export default withStore('namespace', MyComponent);
 ```
 
 ### Access store data on component
@@ -55,9 +55,10 @@ export default withStore(MyComponent);
 ```
 import Store from 'react-observable-store';
 export const updateFoo = (input) => {
-    Store.update({ foo: input });
+    Store.update('namespace', { foo: input });
 };
 ```
+And... voilá! The component will reflect changes from store.
 
 ## Development (`src`, `lib` and the build process)
 

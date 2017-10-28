@@ -12,4 +12,4 @@ var Container = React.createClass({
 	}
 });
 
-exports['default'] = Store.withStore(Container);
+exports['default'] = Store.withStore('namespace', Container);

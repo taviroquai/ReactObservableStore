@@ -3,16 +3,16 @@ var PropTypes = require('prop-types');
 
 var StatelessComponent = React.createClass({
 	propTypes: {
-		title: PropTypes.string.isRequired,
+		title: PropTypes.object.isRequired,
 		update: PropTypes.func.isRequired
 	},
 	render () {
 		return (
 			<div>
-				Edit title in store (sync example)
-				{' '}
-				<input value={this.props.title}
+				Change nested:{' '}
+				<input value={this.props.title.nested}
 					onChange={(e) => this.props.update(e.target.value)}
+					style={{width: '250px'}}
 				/>
 			</div>
 		);
