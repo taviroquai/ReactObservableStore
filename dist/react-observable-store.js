@@ -3919,9 +3919,6 @@ var ObserverComponent = (function (_React$Component) {
 
         _get(Object.getPrototypeOf(ObserverComponent.prototype), 'constructor', this).call(this, props);
 
-        // Create component instance identifier
-        this.id = props.name + '_' + Math.random().toString(36).substring(2);
-
         // Creates the merged data
         this.output = assign({}, props.storage[this.props.namespace]);
         this.output = assign(this.output, props.sanitizeData(props.input));
@@ -3936,7 +3933,7 @@ var ObserverComponent = (function (_React$Component) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             var me = this;
-            this.props.subscribe(this.props.namespace, this.id, function updater(data) {
+            this.id = this.props.subscribe(this.props.namespace, function upd(data) {
                 me.update(data);
             });
         }
@@ -4113,12 +4110,13 @@ var Store = (function () {
      * Allow components to subscribe to store updates
      *
      * @param {String}   namespace  The namespace
-     * @param {String}   id         The observer id
      * @param {Function} fn         The component updater
      */
-    function subscribe(namespace, id, fn) {
+    function _subscribe(namespace, fn) {
+        var id = generateObserverId();
         observers[namespace] = observers[namespace] || {};
         observers[namespace][id] = fn;
+        return id;
     };
 
     /**
@@ -4127,9 +4125,17 @@ var Store = (function () {
      * @param {String} namespace    The namespace
      * @param {String} id           The observer id
      */
-    function unsubscribe(namespace, id) {
+    function _unsubscribe(namespace, id) {
         observers[namespace] = omit(observers[namespace], [id]);
     };
+
+    /**
+     * Generate observer id
+     * @return {String} The observer identifier
+     */
+    function generateObserverId() {
+        return 'o_' + Math.random().toString(36).substring(2);
+    }
 
     /**
      * Call subscribers to store updates
@@ -4147,10 +4153,14 @@ var Store = (function () {
 
     /**
      * Creates a wrapper around the component that will receive the storage data
-     * @param  {React.Component} WrappedComponent  The new component
-     * @return {React.Component}                   The resulting class
+     *
+     * @param  {String}             namesapce           The namespace to subscribe for updates
+     * @param  {React.Component}    WrappedComponent    The new component
+     * @param  {Array}              notifications       The list of notifications to listen for
+     * @return {React.Component}                        The resulting class
      */
     var createObserver = function createObserver(namespace, WrappedComponent) {
+        var notifications = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
         // Get component class name
         var name = WrappedComponent.prototype.constructor.displayName || WrappedComponent.prototype.constructor.name;
@@ -4162,12 +4172,13 @@ var Store = (function () {
         return function (props) {
             return React.createElement(ObserverComponent, {
                 name: name,
-                namespace: namespace,
                 input: props,
                 storage: storage,
                 sanitizeData: sanitizeData,
-                subscribe: subscribe,
-                unsubscribe: unsubscribe,
+                subscribe: _subscribe,
+                unsubscribe: _unsubscribe,
+                namespace: namespace,
+                notifications: notifications,
                 component: WrappedComponent
             });
         };
@@ -4200,6 +4211,25 @@ var Store = (function () {
         // Levels separated by (.) dots
         get: function get(key) {
             return getNested(key);
+        },
+
+        /**
+         * Subscribe to namespace
+         * @param  {String}   namespace The namespace to subscribe
+         * @param  {Function} fn        The subscription callback
+         * @return {String}             The observer id
+         */
+        subscribe: function subscribe(namespace, fn) {
+            return _subscribe(namespace, fn);
+        },
+
+        /**
+         * Unsubscribe to namespace
+         * @param  {String} namespace The namespace to unsubscribe to
+         * @param  {String} id        The observer id got from subsbribe method
+         */
+        unsubscribe: function unsubscribe(namespace, id) {
+            return _unsubscribe(namespace, id);
         }
     };
 })();
