@@ -5,6 +5,7 @@ var Store = require('react-observable-store').default;
 
 Store.init({
     namespace: {
+        loading: false,
         title: {
             nested: 'Welcome to Observable Store'
         }

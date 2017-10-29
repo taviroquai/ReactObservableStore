@@ -104,12 +104,13 @@ const Store = (function () {
      * Allow components to subscribe to store updates
      *
      * @param {String}   namespace  The namespace
-     * @param {String}   id         The observer id
      * @param {Function} fn         The component updater
      */
-    function subscribe(namespace, id, fn) {
+    function subscribe(namespace, fn) {
+        const id = generateObserverId();
         observers[namespace] = observers[namespace] || {};
         observers[namespace][id] = fn;
+        return id;
     };
 
     /**
@@ -121,6 +122,14 @@ const Store = (function () {
     function unsubscribe(namespace, id) {
         observers[namespace] = omit(observers[namespace], [id]);
     };
+
+    /**
+     * Generate observer id
+     * @return {String} The observer identifier
+     */
+    function generateObserverId() {
+        return 'o_' + Math.random().toString(36).substring(2);
+    }
 
     /**
      * Call subscribers to store updates
@@ -138,10 +147,13 @@ const Store = (function () {
 
     /**
      * Creates a wrapper around the component that will receive the storage data
-     * @param  {React.Component} WrappedComponent  The new component
-     * @return {React.Component}                   The resulting class
+     *
+     * @param  {String}             namesapce           The namespace to subscribe for updates
+     * @param  {React.Component}    WrappedComponent    The new component
+     * @param  {Array}              notifications       The list of notifications to listen for
+     * @return {React.Component}                        The resulting class
      */
-    const createObserver = (namespace, WrappedComponent) => {
+    const createObserver = (namespace, WrappedComponent, notifications = []) => {
 
         // Get component class name
         var name = (WrappedComponent.prototype.constructor.displayName
@@ -154,12 +166,13 @@ const Store = (function () {
         return (props) => (
             <ObserverComponent
                 name={name}
-                namespace={namespace}
                 input={props}
                 storage={storage}
                 sanitizeData={sanitizeData}
                 subscribe={subscribe}
                 unsubscribe={unsubscribe}
+                namespace={namespace}
+                notifications={notifications}
                 component={WrappedComponent}
                 >
             </ObserverComponent>
@@ -191,6 +204,25 @@ const Store = (function () {
         // Levels separated by (.) dots
         get: (key) => {
             return getNested(key);
+        },
+
+        /**
+         * Subscribe to namespace
+         * @param  {String}   namespace The namespace to subscribe
+         * @param  {Function} fn        The subscription callback
+         * @return {String}             The observer id
+         */
+        subscribe: (namespace, fn) => {
+            return subscribe(namespace, fn);
+        },
+
+        /**
+         * Unsubscribe to namespace
+         * @param  {String} namespace The namespace to unsubscribe to
+         * @param  {String} id        The observer id got from subsbribe method
+         */
+        unsubscribe: (namespace, id) => {
+            return unsubscribe(namespace, id);
         }
     };
 })();

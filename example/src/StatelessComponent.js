@@ -9,7 +9,11 @@ var StatelessComponent = React.createClass({
 	render () {
 		return (
 			<div>
-				Change nested:{' '}
+				<h3>ContainerA Example (Automatic subscription)</h3>
+				<ul>
+					<li>Loads props from Store using <em>withStore</em></li>
+					<li>Updates store in <em>actions.js</em> (sync)</li>
+				</ul>
 				<input value={this.props.title.nested}
 					onChange={(e) => this.props.update(e.target.value)}
 					style={{width: '250px'}}

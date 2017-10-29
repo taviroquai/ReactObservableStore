@@ -15,9 +15,6 @@ class ObserverComponent extends React.Component {
     constructor(props) {
         super(props);
 
-        // Create component instance identifier
-        this.id = props.name + '_' + Math.random().toString(36).substring(2);
-
         // Creates the merged data
         this.output = assign({}, props.storage[this.props.namespace]);
         this.output = assign(this.output, props.sanitizeData(props.input));
@@ -29,10 +26,9 @@ class ObserverComponent extends React.Component {
      */
     componentDidMount() {
         var me = this;
-        this.props.subscribe(
+        this.id = this.props.subscribe(
             this.props.namespace,
-            this.id,
-            function updater(data) { me.update(data); }
+            function upd(data) { me.update(data); }
         );
     }
 

@@ -29,23 +29,39 @@ npm install react-observable-store --save
 
 ## Usage
 
-### Initialize (ES6) in top level component (or index.js)
-
+**Initialize (ES6) in top level component (or index.js)**  
 ```
 import Store from 'react-observable-store';
-Store.init({ namespace: {foo: 'bar' }}, true);
+Store.init({ namespace: {foo: 'bar' }});
 ```
 
-### Use the store (ES6) in sub level component (container recommended)
+### Automatic updates
+**Attach the store to the component using withStore**  
 ```
 import { withStore } from 'react-observable-store';
 class MyComponent extends React.Component {};
 export default withStore('namespace', MyComponent);
 ```
 
-### Access store data on component
+**Access store data on component**  
 ```
 <p>foo: { this.props.foo }</p>
+```
+
+### Manual subscribe/unsubscribe
+**Load props on constructor**  
+```
+this.state = Store.get('namespace');
+```
+**Subscribe on componentDidMount**  
+```
+this.observerId = Store.subscribe('namespace', (data) => {
+    this.setState(data);
+});
+```
+**Unsubscribe on componentWillUnmount**  
+```
+Store.unsubscribe('namespace', this.observerId);
 ```
 
 ### Update store from actions.js (redux alike)
@@ -55,7 +71,6 @@ export const updateFoo = (input) => {
     Store.update('namespace', { foo: input });
 };
 ```
-And... voilá! The component will reflect changes from store.
 
 ## Development (`src`, `lib` and the build process)
 

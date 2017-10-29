@@ -3,13 +3,13 @@ var StatelessComponent = require('./StatelessComponent').default;
 var Store = require('react-observable-store');
 var actions = require('./actions');
 
-var Container = React.createClass({
+var ContainerA = React.createClass({
 	update(input) {
-		actions.updateTitle(input);
+		actions.updateSync(input);
 	},
 	render () {
 		return (<StatelessComponent {...this.props} update={this.update} />);
 	}
 });
 
-exports['default'] = Store.withStore('namespace', Container);
+exports['default'] = Store.withStore('namespace', ContainerA);
