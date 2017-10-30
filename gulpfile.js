@@ -25,5 +25,5 @@ gulp.task('build', function () {
 });
 
 gulp.task('watch', ['build'], function () {
-    return gulp.watch([taskConfig.default.src + '/**/*.js', '!**/__tests__/**/*'], ['build']);
+    return gulp.watch([taskConfig.component.src + '/**/*.js'], ['build']);
 });
