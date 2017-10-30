@@ -19,8 +19,8 @@
     "type": "git",
     "url": "git+https://github.com/taviroquai/ReactObservableStore.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Marco Afonso",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/taviroquai/ReactObservableStore/issues"
   },
