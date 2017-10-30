@@ -1,4 +1,4 @@
-var Store = require('react-observable-store').default;
+import Store from '../../../src/ReactObservableStore';
 
 export const updateSync = (newTitle) => {
     Store.update('namespace', {title: {nested: newTitle}});

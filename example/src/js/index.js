@@ -1,7 +1,7 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var App = require('./App').default;
-var Store = require('react-observable-store').default;
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import Store from '../../../src/ReactObservableStore';
 
 Store.init({
     namespace: {

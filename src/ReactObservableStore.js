@@ -1,8 +1,8 @@
-var React = require('react');
-var assign = require('lodash.assign');
-var clone = require('lodash.clonedeep');
-var omit = require('lodash.omit');
-var ObserverComponent = require('./ObserverComponent');
+import React from 'react';
+import assign from 'lodash.assign';
+import clone from 'lodash.clonedeep';
+import omit from 'lodash.omit';
+import ObserverComponent from './ObserverComponent';
 
 /**
  * Example of usage in top level application:
@@ -173,7 +173,7 @@ const Store = (function () {
                 unsubscribe={unsubscribe}
                 namespace={namespace}
                 notifications={notifications}
-                component={WrappedComponent}
+                render={(output) => <WrappedComponent {...output} />}
                 >
             </ObserverComponent>
         )

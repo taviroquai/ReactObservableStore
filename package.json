@@ -1,51 +1,49 @@
 {
   "name": "react-observable-store",
   "version": "0.4.1",
-  "description": "Observable store for react components",
+  "description": "Manage global state with an Observable Store.",
   "main": "lib/ReactObservableStore.js",
-  "author": "Marco Afonso",
-  "homepage": "https://github.com/taviroquai/ReactObservableStore",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/taviroquai/ReactObservableStore.git"
-  },
-  "bugs": {
-    "url": "https://github.com/taviroquai/ReactObservableStore/issues"
-  },
-  "dependencies": {
-    "classnames": "^2.1.2",
-    "lodash.assign": "^4.2.0",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.omit": "^4.5.0",
-    "prop-types": "^15.6.0"
-  },
-  "devDependencies": {
-    "babel-eslint": "^4.1.3",
-    "eslint": "^1.6.0",
-    "eslint-plugin-react": "^3.5.1",
-    "gulp": "^3.9.0",
-    "react": "^0.14.0",
-    "react-component-gulp-tasks": "^0.7.6",
-    "react-dom": "^0.14.0"
-  },
-  "peerDependencies": {
-    "react": "^0.14.0"
-  },
-  "browserify-shim": {
-    "react": "global:React"
-  },
-  "scripts": {
-    "build": "gulp clean && NODE_ENV=production gulp build",
-    "examples": "gulp dev:server",
-    "lint": "eslint ./; true",
-    "publish:site": "NODE_ENV=production gulp publish:examples",
-    "release": "NODE_ENV=production gulp release",
-    "start": "gulp dev",
-    "test": "echo \"no tests yet\" && exit 0",
-    "watch": "gulp watch:lib"
-  },
   "keywords": [
     "react",
     "react-component"
-  ]
+  ],
+  "scripts": {
+    "dev": "webpack-dev-server",
+    "build": "webpack",
+    "build-lib": "webpack --config=webpack-lib.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taviroquai/ReactObservableStore.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/taviroquai/ReactObservableStore/issues"
+  },
+  "homepage": "https://github.com/taviroquai/ReactObservableStore#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "classnames": "^2.2.5",
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "html-webpack-plugin": "^2.30.1",
+    "install": "^0.10.1",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.7.1"
+  },
+  "dependencies": {
+    "lodash.assign": "^4.2.0",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.omit": "^4.5.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  }
 }

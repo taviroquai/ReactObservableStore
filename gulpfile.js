@@ -1,42 +1,29 @@
 var gulp = require('gulp');
-var initGulpTasks = require('react-component-gulp-tasks');
-
-/**
- * Tasks are added by the react-component-gulp-tasks package
- *
- * See https://github.com/JedWatson/react-component-gulp-tasks
- * for documentation.
- *
- * You can also add your own additional gulp tasks if you like.
- */
+var babel = require('gulp-babel');
+var del = require('del');
 
 var taskConfig = {
 
 	component: {
+        file: 'ReactObservableStore.js',
 		name: 'ReactObservableStore',
-		dependencies: [
-			'classnames',
-			'react',
-			'react-dom'
-		],
-		lib: 'lib'
-	},
-
-	example: {
-		src: 'example/src',
-		dist: 'example/dist',
-		files: [
-			'index.html',
-			'.gitignore'
-		],
-		scripts: [
-			'example.js'
-		],
-		less: [
-			'example.less'
-		]
+		src: 'src',
+		lib: 'lib',
+		pkgName: 'react-observable-store'
 	}
 
 };
 
-initGulpTasks(gulp, taskConfig);
+gulp.task('clean', function () {
+    return del([taskConfig.component.lib]);
+});
+
+gulp.task('build', function () {
+    return gulp.src([ taskConfig.component.src + '/**/*.js', '!**/__tests__/**/*' ])
+        .pipe(babel({ plugins: [require('babel-plugin-transform-object-assign')] }))
+        .pipe(gulp.dest(taskConfig.component.lib));
+});
+
+gulp.task('watch', ['build'], function () {
+    return gulp.watch([taskConfig.default.src + '/**/*.js', '!**/__tests__/**/*'], ['build']);
+});

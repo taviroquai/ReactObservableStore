@@ -66,7 +66,7 @@ class ObserverComponent extends React.Component {
      * @return {String} The JSX string to be rendered by ReactDOM
      */
     render() {
-        return React.createElement(this.props.component, this.output);
+        return this.props.render(this.output);
     }
 };
 
