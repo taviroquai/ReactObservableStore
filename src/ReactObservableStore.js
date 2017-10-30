@@ -107,7 +107,6 @@ const Store = (function () {
     function setNested(key, value) {
         const segments = key.split('.');
         set(storage, key, sanitizeData(value));
-        console.log('setNested updated', storage);
         logging();
         fire(segments[0], storage[segments[0]]);
     }
@@ -219,7 +218,6 @@ const Store = (function () {
 
         // Set a nested storage value by key. Levels separated by (.) dots
         set: (key, value) => {
-            console.log('set', key, value);
             setNested(key, value);
         },
 
