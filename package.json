@@ -9,8 +9,9 @@
   ],
   "scripts": {
     "dev": "webpack-dev-server",
-    "build": "webpack",
-    "build-lib": "webpack --config=webpack-lib.config.js",
+    "build:example": "webpack",
+    "build": "gulp build",
+    "clean": "gulp clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

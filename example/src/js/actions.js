@@ -7,6 +7,6 @@ export const updateSync = (newTitle) => {
 export const updateAsync = (newTitle) => {
     Store.update('namespace', {loading: true});
     setTimeout(() => {
-        Store.update('namespace', {loading: false, title: {nested: 'Updated'}});
+        Store.update('namespace', {loading: false, title: {nested: newTitle}});
     }, 2000);
 };

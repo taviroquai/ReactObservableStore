@@ -9,11 +9,11 @@ class App extends React.Component {
 			<div>
 				{ this.props.loading ? (<Loading />) : (
 					<pre>
-	                    Read store props with this.props.title.nested: {this.props.title.nested}
+	                    Read store props with <em>this.props.title.nested</em>: {this.props.title.nested}
 	                </pre>
 				) }
 				<pre>
-					Read from anywhere with Store.get('namespace.title.nested'): {Store.get('namespace.title.nested')}
+					Read from anywhere with <em>Store.get('namespace.title.nested')</em>: {Store.get('namespace.title.nested')}
 				</pre>
                 <p>Sync update store <button onClick={(e) => updateSync('sync') }>Update</button></p>
 				<p>Async update store <button onClick={(e) => updateAsync('async') }>Update</button></p>
