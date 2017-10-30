@@ -1,4 +1,6 @@
 import React from 'react';
+import set from 'lodash.set';
+import get from 'lodash.get';
 import assign from 'lodash.assign';
 import clone from 'lodash.clonedeep';
 import omit from 'lodash.omit';
@@ -92,12 +94,22 @@ const Store = (function () {
      * @return {Mixed}      The result
      */
     function getNested(key) {
-        var segments = key.split('.');
-        var result = storage;
-        segments.forEach((item) => {
-            result = result[item];
-        })
+        const segments = key.split('.');
+        const result = get(storage, key, null);
         return result === Object(result) ? assign({}, result) : result;
+    }
+
+    /**
+     * Set nested value
+     * @param  {String} key     The nested key
+     * @param  {Mixed}  value   The value to be set
+     */
+    function setNested(key, value) {
+        const segments = key.split('.');
+        set(storage, key, sanitizeData(value));
+        console.log('setNested updated', storage);
+        logging();
+        fire(segments[0], storage[segments[0]]);
     }
 
     /**
@@ -200,10 +212,15 @@ const Store = (function () {
             updateStore(namespace, props);
         },
 
-        // Get a nested storage value by key
-        // Levels separated by (.) dots
+        // Get a nested storage value by key. Levels separated by (.) dots
         get: (key) => {
             return getNested(key);
+        },
+
+        // Set a nested storage value by key. Levels separated by (.) dots
+        set: (key, value) => {
+            console.log('set', key, value);
+            setNested(key, value);
         },
 
         /**

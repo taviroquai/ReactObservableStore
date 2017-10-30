@@ -1,7 +1,7 @@
 import Store from '../../../src/ReactObservableStore';
 
 export const updateSync = (newTitle) => {
-    Store.update('namespace', {title: {nested: newTitle}});
+    Store.set('namespace.title.nested', newTitle);
 };
 
 export const updateAsync = (newTitle) => {
