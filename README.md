@@ -1,5 +1,8 @@
 # React Observable Store
 
+[![Code Climate](https://codeclimate.com/github/taviroquai/ReactObservableStore/badges/gpa.svg)](https://codeclimate.com/github/taviroquai/ReactObservableStore)
+[![Build Status](https://travis-ci.org/taviroquai/ReactObservableStore.svg?branch=master)](https://travis-ci.org/taviroquai/ReactObservableStore)
+
 ## Why?
 Because in some apps Redux is overkilling.  
 This module uses the Observer Pattern: components subscribe to store updates.  
