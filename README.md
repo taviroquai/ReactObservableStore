@@ -4,9 +4,8 @@
 [![Build Status](https://travis-ci.org/taviroquai/ReactObservableStore.svg?branch=master)](https://travis-ci.org/taviroquai/ReactObservableStore)
 
 ## Why?
-Because in some apps Redux is overkilling.  
+React Observable Store is a very simple state management store (HoC) for ReactJS applications.  
 This module uses the Observer Pattern: components subscribe to store updates.  
-Very simple API.  
 
 ## Demo & Examples
 
@@ -22,13 +21,11 @@ Then open [`localhost:8081`](http://localhost:8081) in a browser.
 
 ## Installation
 
-The easiest way to use react-observable-store is to install it from NPM and include it in your own React build process (using [Browserify](http://browserify.org), [Webpack](http://webpack.github.io/), etc).
-
-You can also use the standalone build by including `dist/react-observable-store.js` in your page. If you use this, make sure you have already included React, and it is available as a global variable.
-
 ```
 npm install react-observable-store --save
 ```
+
+You can also use the standalone build by including `dist/react-observable-store.js` in your page. If you use this, make sure you have already included React, and it is available as a global variable.
 
 ## Usage
 
