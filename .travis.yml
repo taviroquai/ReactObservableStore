@@ -4,4 +4,4 @@ sudo: false
 install:
 - npm install
 script:
-- npm run test
+- npm run travis_test

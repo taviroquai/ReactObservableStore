@@ -13,7 +13,8 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "watch": "gulp watch",
-    "test": "jest --coverage --watch"
+    "test": "jest --coverage --watch",
+    "travis_test": "jest --maxWorkers=4"
   },
   "repository": {
     "type": "git",
