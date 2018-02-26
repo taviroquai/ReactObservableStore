@@ -68,13 +68,11 @@ const Store = (function () {
      * @param {Boolean} merge       The update method: merge or override
      */
     function updateStore(namespace, data, merge = true) {
-        storage[namespace] = storage[namespace] || {};
-        observers[namespace] = observers[namespace] || {};
-        storage[namespace] = merge ? assign(storage[namespace], sanitizeData(data))
-            : assign({}, sanitizeData(data));
+        if (!storage[namespace]) throw new Error('Invalid namespace');
+        storage[namespace] = assign(merge ? storage[namespace] : {}, sanitizeData(data));
         logging();
         fire(namespace, storage[namespace]);
-    };
+    }
 
     /**
      * Method to init the storage
@@ -84,9 +82,11 @@ const Store = (function () {
      */
     function init(data, log = false) {
         showLog = log;
+        if (!data) throw new Error('Invalid store initialization');
         storage = assign({}, sanitizeData(data));
+        for (let namespace in storage) observers[namespace] = {};
         logging();
-    };
+    }
 
     /**
      * Get nested value
@@ -119,10 +119,10 @@ const Store = (function () {
      */
     function subscribe(namespace, fn) {
         const id = generateObserverId();
-        observers[namespace] = observers[namespace] || {};
+        if (!observers[namespace]) throw new Error('Invalid namespace');
         observers[namespace][id] = fn;
         return id;
-    };
+    }
 
     /**
      * Allow components to unsubscribe to store updates
@@ -132,7 +132,7 @@ const Store = (function () {
      */
     function unsubscribe(namespace, id) {
         observers[namespace] = omit(observers[namespace], [id]);
-    };
+    }
 
     /**
      * Generate observer id
@@ -154,17 +154,16 @@ const Store = (function () {
         Object.keys(observers[namespace]).forEach((id) => {
             observers[namespace][id].call(scope, data);
         });
-    };
+    }
 
     /**
      * Creates a wrapper around the component that will receive the storage data
      *
      * @param  {String}             namesapce           The namespace to subscribe for updates
      * @param  {React.Component}    WrappedComponent    The new component
-     * @param  {Array}              notifications       The list of notifications to listen for
      * @return {React.Component}                        The resulting class
      */
-    const createObserver = (namespace, WrappedComponent, notifications = []) => {
+    const createObserver = (namespace, WrappedComponent) => {
 
         // Get component class name
         var name = (WrappedComponent.prototype.constructor.displayName
@@ -183,12 +182,11 @@ const Store = (function () {
                 subscribe={subscribe}
                 unsubscribe={unsubscribe}
                 namespace={namespace}
-                notifications={notifications}
                 render={(output) => <WrappedComponent {...output} />}
                 >
             </ObserverComponent>
         )
-    };
+    }
 
     /**
      * The public API methods
@@ -207,8 +205,8 @@ const Store = (function () {
         },
 
         // Updates the store
-        update: (namespace, props) => {
-            updateStore(namespace, props);
+        update: (namespace, props, merge = true) => {
+            updateStore(namespace, props, merge);
         },
 
         // Get a nested storage value by key. Levels separated by (.) dots

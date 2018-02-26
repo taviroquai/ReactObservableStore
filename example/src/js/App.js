@@ -3,26 +3,14 @@ import Store, { withStore } from '../../../src/ReactObservableStore';
 import { updateSync, updateAsync } from './actions';
 import SubComponent from './SubComponent';
 import Loading from './Loading';
+import { withRouter } from 'react-router-dom';
 
 class App extends React.Component {
+	componentWillMount() {
+		updateSync('Store on will mount')
+	}
 	render () {
-		return (
-			<div>
-				{ this.props.loading ? <Loading /> : <SubComponent {...this.props} /> }
-				<p>
-					Read from anywhere with <em>Store.get('namespace.title.nested')</em>: {Store.get('namespace.title.nested')}
-				</p>
-                <p>
-					Sync <button onClick={(e) => updateSync('sync') }>Update</button> example
-					{' '}using <em>{`Store.set('namespace.title.nested', 'sync')`}</em>
-				</p>
-				<p>
-					Async <button onClick={(e) => updateAsync('async') }>Update</button> example
-					{' '}using <em>{`Store.update('namespace', {loading: false, title: {nested: 'async'}})`}</em>
-				</p>
-			</div>
-		);
+		return this.props.loading ? <Loading /> : <SubComponent {...this.props} />
 	}
 }
-
-export default withStore('namespace', App);
+export default withRouter(withStore('namespace', App));

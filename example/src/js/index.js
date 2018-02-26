@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import Root from './Root';
 import Store from '../../../src/ReactObservableStore';
 
 Store.init({
@@ -12,4 +12,4 @@ Store.init({
     }
 }, true);
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ReactDOM.render(<Root />, document.getElementById('app'));

@@ -13,7 +13,7 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "watch": "gulp watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage --watch"
   },
   "repository": {
     "type": "git",
@@ -27,17 +27,23 @@
   "homepage": "https://github.com/taviroquai/ReactObservableStore#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
+    "babel-jest": "^22.4.1",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-object-assign": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "classnames": "^2.2.5",
     "del": "^3.0.0",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
     "html-webpack-plugin": "^2.30.1",
     "install": "^0.10.1",
+    "jest": "^22.4.2",
+    "react-test-renderer": "^16.2.0",
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.7.1"
   },
@@ -48,6 +54,7 @@
     "lodash.omit": "^4.5.0",
     "lodash.set": "^4.3.2",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "react-dom": "^16.0.0",
+    "react-router-dom": "^4.2.2"
   }
 }

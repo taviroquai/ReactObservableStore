@@ -15,58 +15,53 @@ class ObserverComponent extends React.Component {
     constructor(props) {
         super(props);
 
-        // Creates the merged data
-        this.output = assign({}, props.storage[this.props.namespace]);
-        this.output = assign(this.output, props.sanitizeData(props.input));
+        // Track isMounted locally
+        this._isMounted = false;
+
+        // Set initial state
+        this.state = assign({}, props.storage[this.props.namespace]);
+
+        // Subscribe to store
+        const me = this;
+        me.id = props.subscribe(props.namespace, function upd(data) {
+            me.update(data);
+        });
     }
 
     /**
-     * On component mount, subscribe to store updates
+     * Update component state
+     * @param {Object}  data  The data to be updated
+     * @param {Boolean} merge Flag to merge with current state
+     */
+    update(data) {
+        const newState = assign(this.state, data);
+        if (this._isMounted) this.setState(newState);
+    }
+
+    /**
+     * On component did mount, set _isMounted
      * @return {Boolean} The react result
      */
     componentDidMount() {
-        var me = this;
-        this.id = this.props.subscribe(
-            this.props.namespace,
-            function upd(data) { me.update(data); }
-        );
-    }
-
-    /**
-     * Update component state with new props
-     * @param  {Object} nextProps The next props that will be received
-     */
-    componentWillReceiveProps(nextProps) {
-        this.update(nextProps.input);
+        this._isMounted = true;
     }
 
     /**
      * Unsubscribe observers of components that will unmount
      */
     componentWillUnmount() {
-        this.props.unsubscribe(this.props.namespace, this.id);
+        this._isMounted = false;
     }
 
     /**
-     * Update component state
-     * @param  {Object} data The data to be updated
-     */
-    update(data, merge = true) {
-        this.output = merge ? assign(this.output, this.props.sanitizeData(data))
-            : this.props.sanitizeData(data);
-
-        // Delegate updates to wrapped component
-        this.forceUpdate();
-    }
-
-    /**
-     * Renders the wrapper
-     * Allows the component to access the store update method
-     * and to unsubscribe to store store updates
+     * Renders the wrapped component
      * @return {String} The JSX string to be rendered by ReactDOM
      */
     render() {
-        return this.props.render(this.output);
+        var { storage, namespace } = this.props;
+        var output = assign({}, this.props.input)
+        output = assign(output, storage[namespace])
+        return this.props.render(output);
     }
 };
 
