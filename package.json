@@ -13,8 +13,13 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "watch": "gulp watch",
+    "test_clear": "jest --clearCache",
     "test": "jest --coverage --watch",
     "travis_test": "jest --maxWorkers=4"
+  },
+  "jest": {
+    "verbose": true,
+    "testPathIgnorePatterns": ["/node_modules", "lib"]
   },
   "repository": {
     "type": "git",

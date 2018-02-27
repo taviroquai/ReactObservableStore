@@ -1,5 +1,5 @@
-var React = require('react');
-var assign = require('lodash.assign');
+const React = require('react');
+const assign = require('lodash.assign');
 
 /**
  * The observer component
@@ -19,7 +19,7 @@ class ObserverComponent extends React.Component {
         this._isMounted = false;
 
         // Set initial state
-        this.state = assign({}, props.storage[this.props.namespace]);
+        this.state = assign({}, props.store.get(props.namespace));
 
         // Subscribe to store
         const me = this;
@@ -58,9 +58,9 @@ class ObserverComponent extends React.Component {
      * @return {String} The JSX string to be rendered by ReactDOM
      */
     render() {
-        var { storage, namespace } = this.props;
+        var { store, namespace } = this.props;
         var output = assign({}, this.props.input)
-        output = assign(output, storage[namespace])
+        output = assign(output, store.get(namespace))
         return this.props.render(output);
     }
 };

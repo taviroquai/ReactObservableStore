@@ -13,12 +13,6 @@ class Component extends React.Component {
     }
 }
 
-class Root extends React.Component {
-    render() {
-        return <div>{this.props.children}</div>
-    }
-}
-
 test('throws error on empty init', () => {
     expect(() => {
         Store.init();
@@ -66,12 +60,6 @@ test('set and get from store', () => {
     expect(result).toEqual({nested: value});
 });
 
-test('test with store', () => {
-    Store.init({ namespace: { foo: "bar" }});
-    const result = withStore('namespace', Component);
-    expect(result).toEqual(expect.any(Function));
-});
-
 test('manual subscribe and unsubscribe', (done) => {
     const change = { foo: false }
     Store.init({ namespace: { foo: true }});
@@ -83,17 +71,23 @@ test('manual subscribe and unsubscribe', (done) => {
     Store.update('namespace', change);
 });
 
-test('render with store', () => {
+test('test withStore', () => {
+    Store.init({ namespace: { foo: "bar" }});
+    const TestComp = withStore('namespace', Component);
+    expect(TestComp).toEqual(expect.any(Function));
+});
+
+test('render withStore', () => {
     Store.init({ namespace: { foo: "bar" }});
     const TestCompEmpty = withStore('empty', Component)
     const TestComp = withStore('namespace', Component)
-    const wrapper = mount(<TestComp foo="bar" />);
+    const wrapper = mount(<TestComp />);
     wrapper.unmount();
 });
 
 test('update observer', () => {
     Store.init({ namespace: { foo: "bar" }});
     const TestComp = withStore('namespace', Component)
-    const result = mount(<TestComp foo="bar" />);
+    const result = mount(<TestComp />);
     Store.update('namespace', { foo: "baz" });
 });

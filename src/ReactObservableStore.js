@@ -1,169 +1,151 @@
 import React from 'react';
-import set from 'lodash.set';
-import get from 'lodash.get';
-import assign from 'lodash.assign';
-import clone from 'lodash.clonedeep';
-import omit from 'lodash.omit';
+import Store from './Store';
+import ObservableTrait from './ObservableTrait';
 import ObserverComponent from './ObserverComponent';
 
 /**
- * Example of usage in top level application:
- *  import Store from 'react-observable-store';
- *  Store.init({ namespace: {foo: 'bar' }}, true);
- *
- * Example of usage in sub level component, ie. similar to redux connect usage:
- *  import { withStore } from 'react-observable-store';
- *  class MyComponent extends React.Component {};
- *  export default withStore('namespace', MyComponent);
- *
- * After this, the store data can be used in component like as any other props:
- *  <p>{ this.props.foo }</p>
+ * Ensure singleton instance
+ * @type {ReactObservableStore}
  */
+let instance = null;
 
 /**
  * The global state store
  * @return {Object} The global state store
  */
-const Store = (function () {
+class ReactObservableStore {
 
     /**
-     * The private storage
-     * @type {Object}
+     * Create React Observable Store
+     *
+     * @return {ReactObservableStore} The instance
      */
-    var storage = {};
+    constructor() {
 
-    /**
-     * Show store on console
-     * @type {Boolean}
-     */
-    var showLog = false;
+        /**
+         * Ensure no other instance than singleton
+         *
+         * @type {ReactObservableStore}
+         */
+        if (instance) return instance;
 
-    /**
-     * The store observers
-     * @type {Array}
-     */
-    var observers = {};
+        /**
+         * Show store on console
+         *
+         * @type {Boolean}
+         */
+        this.showLog = false;
+
+        /**
+         * The store
+         *
+         * @type {Store}
+         */
+        this.store = new Store();
+
+        /**
+         * Observable trait
+         *
+         * @type {ObservableTrait}
+         */
+        this.observable = new ObservableTrait();
+
+        /**
+         * Set singleton
+         * @type {[type]}
+         */
+        instance = this;
+        return instance;
+    }
 
     /**
      * Log current storage
      */
-    function logging() {
-        showLog && console && console.log('Store', storage);
+    logging() {
+        this.showLog && console && console.log('Store', this.store.getStorage());
     }
 
     /**
-     * Sanitize allowed data to be stored, ie. only plain JS objects allowed
-     * @param  {Object} data The data to be stored
-     * @return {Object}      The sanitized data
-     */
-    function sanitizeData(data) {
-        return clone(JSON.parse(JSON.stringify(data)));
-    }
-
-    /**
-     * Method to update the storage data
+     * Initialize the store
      *
-     * @param {String} namespace    The namespace
-     * @param {Object} data         The data to be stored
-     * @param {Boolean} merge       The update method: merge or override
+     * @param  {Object}  data        Initial data
+     * @param  {Boolean} [log=false] Logging flag
      */
-    function updateStore(namespace, data, merge = true) {
-        if (!storage[namespace]) throw new Error('Invalid namespace');
-        storage[namespace] = assign(merge ? storage[namespace] : {}, sanitizeData(data));
-        logging();
-        fire(namespace, storage[namespace]);
+    init(data, log = false) {
+        this.store.init(data);
+        for (let namespace in data) this.observable.init(namespace);
+        this.showLog = log;
     }
 
     /**
-     * Method to init the storage
+     * Updates the store
      *
-     * @param {String} namespace   The namespace
-     * @param {Object} data        The initial data to be stored
+     * @param  {String}  namespace    The namespace to update
+     * @param  {Object}  data         The data
+     * @param  {Boolean} [merge=true] Update strategy
      */
-    function init(data, log = false) {
-        showLog = log;
-        if (!data) throw new Error('Invalid store initialization');
-        storage = assign({}, sanitizeData(data));
-        for (let namespace in storage) observers[namespace] = {};
-        logging();
+    update(namespace, data, merge = true) {
+        this.store.update(namespace, data, merge);
+        this.observable.fire(namespace, this.store.get(namespace));
     }
 
     /**
-     * Get nested value
-     * @param  {String} key The nested key
-     * @return {Mixed}      The result
+     * Get store value
+     *
+     * @param  {String} key The key of value to get
+     * @return {Mixed}      The value to return
      */
-    function getNested(key) {
+    get(key) {
+        return this.store.get(key);
+    }
+
+    /**
+     * Set store value
+     *
+     * @param {String} key   The key to store the value
+     * @param {Mixed} value  The value to be stored
+     */
+    set(key, value) {
+        this.store.set(key, value);
         const segments = key.split('.');
-        const result = get(storage, key, null);
-        return result === Object(result) ? assign({}, result) : result;
+        this.observable.fire(segments[0], this.store.get(segments[0]));
     }
 
     /**
-     * Set nested value
-     * @param  {String} key     The nested key
-     * @param  {Mixed}  value   The value to be set
-     */
-    function setNested(key, value) {
-        const segments = key.split('.');
-        set(storage, key, sanitizeData(value));
-        logging();
-        fire(segments[0], storage[segments[0]]);
-    }
-
-    /**
-     * Allow components to subscribe to store updates
+     * Subscribe to namespace
      *
-     * @param {String}   namespace  The namespace
-     * @param {Function} fn         The component updater
+     * @param  {String}   namespace The namespace to subscribe
+     * @param  {Function} fn        The subscription callback
+     * @return {String}             The observer id
      */
-    function subscribe(namespace, fn) {
-        const id = generateObserverId();
-        if (!observers[namespace]) throw new Error('Invalid namespace');
-        observers[namespace][id] = fn;
-        return id;
+    subscribe(namespace, fn) {
+        return this.observable.subscribe(namespace, fn);
     }
 
     /**
-     * Allow components to unsubscribe to store updates
+     * Unsubscribe to namespace
      *
-     * @param {String} namespace    The namespace
-     * @param {String} id           The observer id
+     * @param  {String} namespace The namespace to unsubscribe to
+     * @param  {String} id        The observer id got from subsbribe method
      */
-    function unsubscribe(namespace, id) {
-        observers[namespace] = omit(observers[namespace], [id]);
-    }
-
-    /**
-     * Generate observer id
-     * @return {String} The observer identifier
-     */
-    function generateObserverId() {
-        return 'o_' + Math.random().toString(36).substring(2);
-    }
-
-    /**
-     * Call subscribers to store updates
-     *
-     * @param {String}  namespace   The namespace
-     * @param {Object}  data        The event/data
-     * @param {Boolean} thisObj     The context
-     */
-    function fire(namespace, data, thisObj) {
-        var scope = thisObj || window;
-        Object.keys(observers[namespace]).forEach((id) => {
-            observers[namespace][id].call(scope, data);
-        });
+    unsubscribe(namespace, id) {
+        return this.observable.unsubscribe(namespace, id);
     }
 
     /**
      * Creates a wrapper around the component that will receive the storage data
      *
-     * @param  {String}             namesapce           The namespace to subscribe for updates
-     * @param  {React.Component}    WrappedComponent    The new component
-     * @return {React.Component}                        The resulting class
+     * @param  {String}             namespace           The namespace to subscribe for updates
+     * @param  {Component}          WrappedComponent    The new component
+     * @return {Component}                              The resulting class
      */
-    const createObserver = (namespace, WrappedComponent) => {
+    withStore(namespace, WrappedComponent) {
+
+        /**
+         * Keep reference to instance
+         * @type {[type]}
+         */
+        var me = instance;
 
         // Get component class name
         var name = (WrappedComponent.prototype.constructor.displayName
@@ -177,69 +159,22 @@ const Store = (function () {
             <ObserverComponent
                 name={name}
                 input={props}
-                storage={storage}
-                sanitizeData={sanitizeData}
-                subscribe={subscribe}
-                unsubscribe={unsubscribe}
+                store={me.store}
+                subscribe={(nsp, fn) => me.subscribe(nsp, fn)}
                 namespace={namespace}
                 render={(output) => <WrappedComponent {...output} />}
-                >
-            </ObserverComponent>
+            />
         )
     }
+}
 
-    /**
-     * The public API methods
-     * @type {Object}
-     */
-    return {
-
-        // Initialize the store
-        init: (data, log = false) => {
-            init(data, log);
-        },
-
-        // Wraps the component with the store method
-        withStore: (namespace, component) => {
-            return createObserver(namespace, component);
-        },
-
-        // Updates the store
-        update: (namespace, props, merge = true) => {
-            updateStore(namespace, props, merge);
-        },
-
-        // Get a nested storage value by key. Levels separated by (.) dots
-        get: (key) => {
-            return getNested(key);
-        },
-
-        // Set a nested storage value by key. Levels separated by (.) dots
-        set: (key, value) => {
-            setNested(key, value);
-        },
-
-        /**
-         * Subscribe to namespace
-         * @param  {String}   namespace The namespace to subscribe
-         * @param  {Function} fn        The subscription callback
-         * @return {String}             The observer id
-         */
-        subscribe: (namespace, fn) => {
-            return subscribe(namespace, fn);
-        },
-
-        /**
-         * Unsubscribe to namespace
-         * @param  {String} namespace The namespace to unsubscribe to
-         * @param  {String} id        The observer id got from subsbribe method
-         */
-        unsubscribe: (namespace, id) => {
-            return unsubscribe(namespace, id);
-        }
-    };
-})();
+/**
+ * Create singleton
+ *
+ * @type {ReactObservableStore}
+ */
+const Singleton = new ReactObservableStore();
 
 // Export public API
-export const withStore = Store.withStore;
-export default Store;
+export const withStore = Singleton.withStore;
+export default Singleton;
