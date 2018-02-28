@@ -1,3 +1,5 @@
+import React from 'react';
+import ObserverComponent from './ObserverComponent';
 import omit from 'lodash.omit';
 
 /**
@@ -5,11 +7,11 @@ import omit from 'lodash.omit';
  * Implements the observer pattern being the subject
  * @return {Object} The global state store
  */
-class ObservableTrait {
+class ObservableStrategy {
 
     /**
      * Create the observable mixin
-     * @return {ObservableTrait} [description]
+     * @return {ObservableStrategy} [description]
      */
     constructor() {
 
@@ -36,7 +38,7 @@ class ObservableTrait {
      */
     subscribe(namespace, fn) {
         if (!this.observers[namespace]) throw new Error('Invalid namespace');
-        const id = ObservableTrait.generateObserverId();
+        const id = ObservableStrategy.generateObserverId();
         this.observers[namespace][id] = fn;
         return id;
     }
@@ -58,7 +60,7 @@ class ObservableTrait {
      * @param {Object}  data        The event/data
      * @param {Boolean} thisObj     The context
      */
-    fire(namespace, data, thisObj) {
+    update(namespace, data, thisObj) {
         var scope = thisObj || window;
         Object.keys(this.observers[namespace]).forEach((id) => {
             this.observers[namespace][id].call(scope, data);
@@ -72,7 +74,38 @@ class ObservableTrait {
     static generateObserverId() {
         return 'o_' + Math.random().toString(36).substring(2);
     }
+
+    /**
+     * Register to namespace changes
+     * @param  {String} namespace        [description]
+     * @param  {Object} store            [description]
+     * @param  {React.Component} WrappedComponent [description]
+     * @return {Function}                  [description]
+     */
+    register(namespace, store, WrappedComponent) {
+
+        //var me = this;
+
+        // Get component class name
+        var name = (WrappedComponent.prototype.constructor.displayName
+            || WrappedComponent.prototype.constructor.name);
+
+        /**
+         * Returns the component wrapper
+         * @type {Object}
+         */
+        return (props) => (
+            <ObserverComponent
+                name={name}
+                input={props}
+                store={store}
+                subscribe={(nsp, fn) => this.subscribe(nsp, fn)}
+                namespace={namespace}
+                render={(output) => <WrappedComponent {...output} />}
+            />
+        )
+    }
 }
 
 // Export public API
-export default ObservableTrait;
+export default ObservableStrategy;

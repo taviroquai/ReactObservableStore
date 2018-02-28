@@ -1,7 +1,5 @@
-import React from 'react';
 import Store from './Store';
-import ObservableTrait from './ObservableTrait';
-import ObserverComponent from './ObserverComponent';
+import ObservableStrategy from './ObservableStrategy';
 
 /**
  * Ensure singleton instance
@@ -13,19 +11,19 @@ let instance = null;
  * The global state store
  * @return {Object} The global state store
  */
-class ReactObservableStore {
+class ReactStore {
 
     /**
-     * Create React Observable Store
+     * Create React Store
      *
-     * @return {ReactObservableStore} The instance
+     * @return {ReactStore} The instance
      */
-    constructor() {
+    constructor(strategy) {
 
         /**
          * Ensure no other instance than singleton
          *
-         * @type {ReactObservableStore}
+         * @type {ReactStore}
          */
         if (instance) return instance;
 
@@ -46,13 +44,13 @@ class ReactObservableStore {
         /**
          * Observable trait
          *
-         * @type {ObservableTrait}
+         * @type {ObservableStrategy}
          */
-        this.observable = new ObservableTrait();
+        this.strategy = strategy;
 
         /**
          * Set singleton
-         * @type {[type]}
+         * @type {ReactStore}
          */
         instance = this;
         return instance;
@@ -73,7 +71,7 @@ class ReactObservableStore {
      */
     init(data, log = false) {
         this.store.init(data);
-        for (let namespace in data) this.observable.init(namespace);
+        for (let namespace in data) this.strategy.init(namespace);
         this.showLog = log;
     }
 
@@ -86,7 +84,7 @@ class ReactObservableStore {
      */
     update(namespace, data, merge = true) {
         this.store.update(namespace, data, merge);
-        this.observable.fire(namespace, this.store.get(namespace));
+        this.strategy.update(namespace, data);
     }
 
     /**
@@ -108,7 +106,8 @@ class ReactObservableStore {
     set(key, value) {
         this.store.set(key, value);
         const segments = key.split('.');
-        this.observable.fire(segments[0], this.store.get(segments[0]));
+        const namespace = segments[0];
+        this.strategy.update(namespace, this.store.get(namespace));
     }
 
     /**
@@ -119,7 +118,7 @@ class ReactObservableStore {
      * @return {String}             The observer id
      */
     subscribe(namespace, fn) {
-        return this.observable.subscribe(namespace, fn);
+        return this.strategy.subscribe(namespace, fn);
     }
 
     /**
@@ -129,7 +128,7 @@ class ReactObservableStore {
      * @param  {String} id        The observer id got from subsbribe method
      */
     unsubscribe(namespace, id) {
-        return this.observable.unsubscribe(namespace, id);
+        return this.strategy.unsubscribe(namespace, id);
     }
 
     /**
@@ -140,31 +139,7 @@ class ReactObservableStore {
      * @return {Component}                              The resulting class
      */
     withStore(namespace, WrappedComponent) {
-
-        /**
-         * Keep reference to instance
-         * @type {[type]}
-         */
-        var me = instance;
-
-        // Get component class name
-        var name = (WrappedComponent.prototype.constructor.displayName
-            || WrappedComponent.prototype.constructor.name);
-
-        /**
-         * Returns the component wrapper
-         * @type {Object}
-         */
-        return (props) => (
-            <ObserverComponent
-                name={name}
-                input={props}
-                store={me.store}
-                subscribe={(nsp, fn) => me.subscribe(nsp, fn)}
-                namespace={namespace}
-                render={(output) => <WrappedComponent {...output} />}
-            />
-        )
+        return instance.strategy.register(namespace, instance.store, WrappedComponent);
     }
 }
 
@@ -173,8 +148,8 @@ class ReactObservableStore {
  *
  * @type {ReactObservableStore}
  */
-const Singleton = new ReactObservableStore();
+const ReactObservableStore = new ReactStore(new ObservableStrategy());
 
 // Export public API
-export const withStore = Singleton.withStore;
-export default Singleton;
+export const withStore = ReactObservableStore.withStore;
+export default ReactObservableStore;

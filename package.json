@@ -19,7 +19,10 @@
   },
   "jest": {
     "verbose": true,
-    "testPathIgnorePatterns": ["/node_modules", "lib"]
+    "testPathIgnorePatterns": [
+      "/node_modules",
+      "lib"
+    ]
   },
   "repository": {
     "type": "git",
