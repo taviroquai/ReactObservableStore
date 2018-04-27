@@ -65,7 +65,7 @@ class Store {
     get(key) {
         const segments = key.split('.');
         const result = get(this.storage, key, null);
-        return result === Object(result) ? assign({}, result) : result;
+        return result;
     }
 
     /**

@@ -60,9 +60,46 @@ test('set and get from store', () => {
     expect(result).toEqual({nested: value});
 });
 
+test('update store returns null with non-serializable values', () => {
+    var result, values = [
+        NaN,
+        Infinity
+    ];
+    values.map(item => {
+        Store.update('namespace', { foo: item });
+        result = Store.get('namespace.foo');
+        expect(result).toEqual(null);
+    });
+});
+
+test('update store succeeds with serializable values', () => {
+    var result, values = [
+      null,
+      true,
+      'bar',
+      9999999999,
+      [],
+      [[]],
+      ['foo'],
+      ['foo', 99999999999],
+      [1,2],
+      {},
+      [{}],
+      {a: false},
+      {a: []},
+      {a: {}},
+      {a: {a: null}}
+    ];
+    values.map(item => {
+      Store.update('namespace', { foo: item });
+      result = Store.get('namespace.foo');
+      expect(result).toEqual(item);
+    });
+});
+
 test('manual subscribe and unsubscribe', (done) => {
     const change = { foo: false }
-    Store.init({ namespace: { foo: true }});
+    Store.init({ namespace: { foo: true }}, true);
     var id = Store.subscribe('namespace', function upd(data) {
         expect(data).toEqual(change);
         Store.unsubscribe('namespace', id);
@@ -72,13 +109,13 @@ test('manual subscribe and unsubscribe', (done) => {
 });
 
 test('test withStore', () => {
-    Store.init({ namespace: { foo: "bar" }});
+    Store.init({ namespace: { foo: "bar" }}, true);
     const TestComp = withStore('namespace', Component);
     expect(TestComp).toEqual(expect.any(Function));
 });
 
 test('render withStore', () => {
-    Store.init({ namespace: { foo: "bar" }});
+    Store.init({ namespace: { foo: "bar" }}, true);
     const TestCompEmpty = withStore('empty', Component)
     const TestComp = withStore('namespace', Component)
     const wrapper = mount(<TestComp />);
@@ -86,7 +123,7 @@ test('render withStore', () => {
 });
 
 test('update observer', () => {
-    Store.init({ namespace: { foo: "bar" }});
+    Store.init({ namespace: { foo: "bar" }}, true);
     const TestComp = withStore('namespace', Component)
     const result = mount(<TestComp />);
     Store.update('namespace', { foo: "baz" });

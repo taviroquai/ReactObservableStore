@@ -60,7 +60,7 @@ class ReactStore {
      * Log current storage
      */
     logging() {
-        this.showLog && console && console.log('Store', this.store.getStorage());
+        if (this.showLog && console) console.log('Store', this.store.getStorage());
     }
 
     /**
