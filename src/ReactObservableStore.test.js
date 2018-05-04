@@ -13,6 +13,16 @@ class Component extends React.Component {
     }
 }
 
+class ComponentBatch extends React.Component {
+    componentDidMount() {
+        Store.update('namespace', { foo: 'update1' });
+        Store.update('namespace', { foo: 'update2' });
+    }
+    render() {
+        return <div>{this.props.foo}</div>
+    }
+}
+
 test('throws error on empty init', () => {
     expect(() => {
         Store.init();
@@ -119,12 +129,23 @@ test('render withStore', () => {
     const TestCompEmpty = withStore('empty', Component)
     const TestComp = withStore('namespace', Component)
     const wrapper = mount(<TestComp />);
+    expect(wrapper.find('div').text()).toEqual("bar");
     wrapper.unmount();
 });
 
 test('update observer', () => {
     Store.init({ namespace: { foo: "bar" }}, true);
     const TestComp = withStore('namespace', Component)
-    const result = mount(<TestComp />);
+    const wrapper = mount(<TestComp />);
     Store.update('namespace', { foo: "baz" });
+    expect(wrapper.find('div').text()).toEqual("baz");
+});
+
+test('update observer from queue', () => {
+    Store.init({ namespace: { foo: "bar" }}, true);
+    const TestComp = withStore('namespace', ComponentBatch)
+    const wrapper = mount(<TestComp />);
+    const propAfterMount = Store.get('namespace.foo')
+    expect(propAfterMount).toEqual('update2');
+    expect(wrapper.find('div').text()).toEqual('update2');
 });

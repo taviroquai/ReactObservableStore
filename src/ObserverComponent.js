@@ -21,6 +21,9 @@ class ObserverComponent extends React.Component {
         // Set initial state
         this.state = assign({}, props.store.get(props.namespace));
 
+        // Set updates queue
+        this._queue = [];
+
         // Subscribe to store
         const me = this;
         me.id = props.subscribe(props.namespace, function upd(data) {
@@ -36,6 +39,7 @@ class ObserverComponent extends React.Component {
     update(data) {
         const newState = assign(this.state, data);
         if (this._isMounted) this.setState(newState);
+        else this._queue.push(newState);
     }
 
     /**
@@ -43,7 +47,14 @@ class ObserverComponent extends React.Component {
      * @return {Boolean} The react result
      */
     componentDidMount() {
-        this._isMounted = true;
+        const me = this;
+        me._isMounted = true;
+        var lastState = {}
+        me._queue.map(item => {
+            lastState = assign(lastState, item);
+        });
+        me.setState(lastState);
+        me._queue.splice(0, me._queue.length);
     }
 
     /**
@@ -51,6 +62,7 @@ class ObserverComponent extends React.Component {
      */
     componentWillUnmount() {
         this._isMounted = false;
+        this.props.unsubscribe(this.props.namespace, this.id);
     }
 
     /**

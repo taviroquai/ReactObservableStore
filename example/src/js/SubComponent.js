@@ -4,9 +4,9 @@ import Store from '../../../src/ReactObservableStore';
 import { Link } from 'react-router-dom';
 
 class SubComponent extends React.Component {
-	clickLink(e, link) {
+	async clickLink(e, link) {
 		e.preventDefault();
-		updateAsync('link clicked');
+		await updateAsync('link clicked');
 		this.props.history.push(link);
 	}
  	render () {
@@ -22,7 +22,7 @@ class SubComponent extends React.Component {
 					React Router Link example: <Link to="/title/id">click</Link>
 				</p>
 				<p>
-					Simple link example: <a role="button" href="" onClick={(e) => this.clickLink(e, '/title/id')}>click</a>
+					Async &amp; router example: <a role="button" href="" onClick={(e) => this.clickLink(e, '/title/id')}>click</a>
 					{' '}using <em>{`Store.set('namespace.title.nested', 'sync')`}</em>
 				</p>
                 <p>

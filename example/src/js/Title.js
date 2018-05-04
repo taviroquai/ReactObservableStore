@@ -7,9 +7,31 @@ import { withRouter } from 'react-router'
 import { Link } from 'react-router-dom';
 
 class Title extends React.Component {
+
+	constructor(props) {
+		super(props);
+		this.state = { loading: true }
+		console.log('constructor loading', this.state.loading)
+	}
+
+	componentDidMount() {
+		console.log('did update, run update')
+		updateSync('Prop did mount')
+	}
+
+	/*
 	componentWillMount() {
 		updateAsync('Update async on will mount')
 	}
+	*/
+	static getDerivedStateFromProps(props, oldState) {
+		console.log('getDerivedStateFromProps', props.loading, oldState.loading);
+		return {
+			...props,
+			loading: props.loading
+		}
+	}
+
 	render () {
 		return this.props.loading ? <Loading /> : (
 			<div>

@@ -100,6 +100,7 @@ class ObservableStrategy {
                 input={props}
                 store={store}
                 subscribe={(nsp, fn) => this.subscribe(nsp, fn)}
+                unsubscribe={(nsp, fn) => this.unsubscribe(nsp, fn)}
                 namespace={namespace}
                 render={(output) => <WrappedComponent {...output} />}
             />
