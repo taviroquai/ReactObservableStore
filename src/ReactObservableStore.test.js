@@ -13,6 +13,16 @@ class Component extends React.Component {
     }
 }
 
+class ComponentSelfUpdate extends React.Component {
+    componentDidMount() {
+        Store.update('namespace', { foo: 'first'});
+        Store.update('namespace', { foo: 'self update'});
+    }
+    render() {
+        return <div>{this.props.foo}</div>
+    }
+}
+
 test('throws error on empty init', () => {
     expect(() => {
         Store.init();
@@ -125,6 +135,14 @@ test('render withStore', () => {
 test('update observer', () => {
     Store.init({ namespace: { foo: "bar" }}, true);
     const TestComp = withStore('namespace', Component)
-    const result = mount(<TestComp />);
+    const wrapper = mount(<TestComp />);
     Store.update('namespace', { foo: "baz" });
+    expect(wrapper.find('div').text()).toEqual('baz');
+});
+
+test('self update', () => {
+    Store.init({ namespace: { foo: "bar" }}, true);
+    const TestComp = withStore('namespace', ComponentSelfUpdate)
+    const wrapper = mount(<TestComp />);
+    expect(wrapper.find('div').text()).toEqual('self update');
 });

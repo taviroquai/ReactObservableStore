@@ -28,13 +28,6 @@ class ReactStore {
         if (instance) return instance;
 
         /**
-         * Show store on console
-         *
-         * @type {Boolean}
-         */
-        this.showLog = false;
-
-        /**
          * The store
          *
          * @type {Store}
@@ -57,22 +50,14 @@ class ReactStore {
     }
 
     /**
-     * Log current storage
-     */
-    logging() {
-        if (this.showLog && console) console.log('Store', this.store.getStorage());
-    }
-
-    /**
      * Initialize the store
      *
      * @param  {Object}  data        Initial data
      * @param  {Boolean} [log=false] Logging flag
      */
     init(data, log = false) {
-        this.store.init(data);
+        this.store.init(data, log);
         for (let namespace in data) this.strategy.init(namespace);
-        this.showLog = log;
     }
 
     /**

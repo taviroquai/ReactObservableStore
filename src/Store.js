@@ -15,13 +15,20 @@ class Store {
      * @param  {Object} [storage={}] [description]
      * @return {Store}              [description]
      */
-    constructor(storage = {}) {
+    constructor(storage = {}, log = false) {
 
         /**
          * The private storage
          * @type {Object}
          */
         this.storage = clone(storage);
+
+        /**
+         * Show store on console
+         *
+         * @type {Boolean}
+         */
+        this.showLog = log;
     }
 
     /**
@@ -34,12 +41,20 @@ class Store {
     }
 
     /**
+     * Log current storage
+     */
+    logging() {
+        if (this.showLog && console) console.log('Store', this.storage);
+    }
+
+    /**
      * Method to init the storage
      *
      * @param {String} namespace   The namespace
      * @param {Object} data        The initial data to be stored
      */
-    init(data) {
+    init(data, log = false) {
+        this.showLog = log;
         if (!data) throw new Error('Invalid store initialization');
         this.storage = assign({}, Store.sanitizeData(data));
     }
@@ -55,6 +70,7 @@ class Store {
         if (!this.storage[namespace]) throw new Error('Invalid namespace');
         const update = merge ? this.storage[namespace] : {};
         this.storage[namespace] = assign(update, Store.sanitizeData(data));
+        this.logging();
     }
 
     /**
@@ -75,6 +91,7 @@ class Store {
      */
     set(key, value) {
         set(this.storage, key, Store.sanitizeData(value));
+        this.logging();
     }
 }
 

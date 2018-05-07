@@ -18,6 +18,9 @@ class ObserverComponent extends React.Component {
         // Track isMounted locally
         this._isMounted = false;
 
+        // Queue for batch updates
+        this._queue = [];
+
         // Set initial state
         this.state = assign({}, props.store.get(props.namespace));
 
@@ -36,6 +39,16 @@ class ObserverComponent extends React.Component {
     update(data) {
         const newState = assign(this.state, data);
         if (this._isMounted) this.setState(newState);
+        else this._queue.push(newState);
+    }
+
+    flushUpdates() {
+        if (this._queue.length) {
+            var newState = {}
+            this._queue.map((state) => newState = assign(newState, state));
+            this.setState(newState);
+            this._queue.splice(0, this._queue.length);
+        }
     }
 
     /**
@@ -44,6 +57,7 @@ class ObserverComponent extends React.Component {
      */
     componentDidMount() {
         this._isMounted = true;
+        this.flushUpdates();
     }
 
     /**
@@ -51,6 +65,7 @@ class ObserverComponent extends React.Component {
      */
     componentWillUnmount() {
         this._isMounted = false;
+        this.props.unsubscribe(this.props.namespace, this.id);
     }
 
     /**
