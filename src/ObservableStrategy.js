@@ -63,7 +63,9 @@ class ObservableStrategy {
     update(namespace, data, thisObj) {
         var scope = thisObj || window;
         Object.keys(this.observers[namespace]).forEach((id) => {
-            this.observers[namespace][id].call(scope, data);
+            if (this.observers[namespace][id]) {
+                this.observers[namespace][id].call(scope, data);
+            }
         });
     }
 
