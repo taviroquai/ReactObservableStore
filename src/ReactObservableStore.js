@@ -60,6 +60,18 @@ class ReactStore {
         for (let namespace in data) this.strategy.init(namespace);
     }
 
+    /*
+     * Extract namespace from key
+     * 
+     * @param   {String}  key    The key to parse from
+     * @return  {String}  The resulting namespace
+     */
+    extractNamespaceFromKey(path) {
+        const segments = path.split('.');
+        const namespace = segments[0];
+        return namespace;
+    }
+
     /**
      * Updates the store
      *
@@ -68,8 +80,10 @@ class ReactStore {
      * @param  {Boolean} [merge=true] Update strategy
      */
     update(namespace, data, merge = true) {
+        if (!this.store.isValidNamespace(namespace)) throw new Error('Invalid namespace');
         this.store.update(namespace, data, merge);
-        this.strategy.update(namespace, data);
+        const updatedData = this.store.get(namespace);
+        this.strategy.update(namespace, updatedData);
     }
 
     /**
@@ -90,8 +104,7 @@ class ReactStore {
      */
     set(key, value) {
         this.store.set(key, value);
-        const segments = key.split('.');
-        const namespace = segments[0];
+        const namespace = this.extractNamespaceFromKey(key);
         this.strategy.update(namespace, this.store.get(namespace));
     }
 
@@ -119,12 +132,12 @@ class ReactStore {
     /**
      * Creates a wrapper around the component that will receive the storage data
      *
-     * @param  {String}             namespace           The namespace to subscribe for updates
-     * @param  {Component}          WrappedComponent    The new component
-     * @return {Component}                              The resulting class
+     * @param  {String}     namespace   The namespace to subscribe for updates
+     * @param  {Component}  listener    The listener that will receive updates
+     * @return {Component|unsubscriber} The result
      */
-    withStore(namespace, WrappedComponent) {
-        return instance.strategy.register(namespace, instance.store, WrappedComponent);
+    withStore(namespace, listener) {
+        return instance.strategy.register(namespace, instance.store, listener);
     }
 }
 

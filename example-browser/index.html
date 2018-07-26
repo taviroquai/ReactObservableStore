@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>react-observable-store</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>react-observable-store</h1>
+      <h2><a href="https://github.com/taviroquai/ReactObservableStore">View project on GitHub</a></h2>
+      <!-- the example app is rendered into this div -->
+      <div id="index"></div>
+      <div class="hint">
+        <!-- put any hints about your component example here -->
+      </div>
+      <div class="footer">
+        Copyright &copy; 2017 Marco Afonso.
+      </div>
+    </div>
+    <script src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
+    <script>/* Needed to use in browser */ var process = { env: { NODE_ENV: null } }</script>
+    <script src="../lib/index.js"></script>
+    <script type="module">
+
+      // Create alias for easy reading
+      const e = React.createElement;
+      const Store = ReactObservableStore.default;
+      const withStore = ReactObservableStore.withStore;
+
+      // Init Store
+      Store.init({ app: { title: null }}, true);
+
+      // Create the component
+      class MyApp extends React.Component {
+        render() {
+          if (this.props.title) {
+            return e('p', null, this.props.title);
+          }
+
+          return e(
+            'button',
+            { onClick: () => Store.update('app', { title: 'Welcome to React Observable Store' }) },
+            'Change State'
+          );
+        }
+      }
+
+      // Attach the store to component
+      var MyAppWithStore = withStore('app', MyApp);
+      const domContainer = document.querySelector('#index');
+      ReactDOM.render(e(MyAppWithStore), domContainer);
+      
+    </script>
+  </body>  
+</html>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import App from './App';
-import Title from './Title';
+import AsyncRecord from './AsyncRecord';
 
 class Root extends React.Component {
 	render () {
@@ -9,7 +9,7 @@ class Root extends React.Component {
 			<Router>
 				<Switch>
 					<Route exact path="/" component={App} />
-					<Route path="/title/:param" render={(props) => <Title foo="bar" {...props} />} />
+					<Route path="/record/:param" render={(props) => <AsyncRecord foo="bar" {...props} />} />
 				</Switch>
 			</Router>
 		)

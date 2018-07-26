@@ -1,6 +1,6 @@
 import React from 'react';
 import ObserverComponent from './ObserverComponent';
-import omit from 'lodash.omit';
+import omit from 'lodash-es/omit';
 
 /**
  * Observable trait
@@ -37,7 +37,7 @@ class ObservableStrategy {
      * @param {Function} fn         The component updater
      */
     subscribe(namespace, fn) {
-        if (!this.observers[namespace]) throw new Error('Invalid namespace');
+        if (!this.observers[namespace]) throw new Error('Invalid namespace to be subscribed');
         const id = ObservableStrategy.generateObserverId();
         this.observers[namespace][id] = fn;
         return id;
@@ -61,8 +61,8 @@ class ObservableStrategy {
      * @param {Boolean} thisObj     The context
      */
     update(namespace, data, thisObj) {
-        var scope = thisObj || window;
-        Object.keys(this.observers[namespace]).forEach((id) => {
+        const scope = thisObj || window;
+        Object.keys(this.observers[namespace]).forEach(id => {
             if (this.observers[namespace][id]) {
                 this.observers[namespace][id].call(scope, data);
             }
@@ -78,19 +78,21 @@ class ObservableStrategy {
     }
 
     /**
-     * Register to namespace changes
-     * @param  {String} namespace        [description]
-     * @param  {Object} store            [description]
-     * @param  {React.Component} WrappedComponent [description]
-     * @return {Function}                  [description]
+     * Register component observer
+     * @param  {String}             namespace   The namespace to be subscribed
+     * @param  {Object}             store       The store containing the data
+     * @param  {React.Component}    observer    The observer Component
+     * @return {Function}                       The result
      */
     register(namespace, store, WrappedComponent) {
 
-        //var me = this;
+        if (!WrappedComponent || !this.isReactComponent(WrappedComponent)) {
+            throw new Error('Invalid observer for React Observable Store');
+        }
 
         // Get component class name
-        var name = (WrappedComponent.prototype.constructor.displayName
-            || WrappedComponent.prototype.constructor.name);
+        const construct = WrappedComponent.prototype.constructor;
+        const name = (construct.displayName || construct.name);
 
         /**
          * Returns the component wrapper
@@ -107,6 +109,16 @@ class ObservableStrategy {
                 render={(output) => <WrappedComponent {...output} />}
             />
         )
+    }
+
+    /**
+     * Checks if the observer is a React.Component
+     * 
+     * @param {Function} observer 
+     */
+    isReactComponent(observer) {
+        return !!observer.prototype.isReactComponent
+            || !!observer.prototype.isPureReactComponent;
     }
 }
 

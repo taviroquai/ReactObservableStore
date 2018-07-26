@@ -1,5 +1,5 @@
-const React = require('react');
-const assign = require('lodash.assign');
+import React from 'react';
+import assign from 'lodash-es/assign';
 
 /**
  * The observer component
@@ -42,12 +42,15 @@ class ObserverComponent extends React.Component {
         else this._queue.push(newState);
     }
 
+    /**
+     * Flush pending updates in queue
+     */
     flushUpdates() {
         if (this._queue.length) {
             var newState = {}
             this._queue.map((state) => newState = assign(newState, state));
-            this.setState(newState);
             this._queue.splice(0, this._queue.length);
+            this.update(newState);
         }
     }
 

@@ -1,8 +1,6 @@
 import Store, { withStore } from './ReactObservableStore';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import renderer from 'react-test-renderer';
-import {mount, shallow, configure} from 'enzyme';
+import {mount, configure} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 configure({ adapter: new Adapter() });
@@ -29,9 +27,21 @@ test('throws error on empty init', () => {
     }).toThrow();
 });
 
-test('throws error on invalid subscribe namespace', () => {
+test('throws error on invalid subscribe namespace on subscribe', () => {
     expect(() => {
-        var id = Store.subscribe('namespace', function upd(data) {});
+        Store.subscribe('namespace', function upd(data) {});
+    }).toThrow();
+});
+
+test('throws error on invalid subscribe namespace on withStore', () => {
+    expect(() => {
+        withStore('invalid', function upd(data) {});
+    }).toThrow();
+});
+
+test('throws error on empty observer on withStore', () => {
+    expect(() => {
+        withStore('namespace');
     }).toThrow();
 });
 
@@ -47,6 +57,12 @@ test('init store', () => {
     Store.init({ namespace: { foo: true }});
     Store.init({ namespace: { foo: true }}, true);
     Store.init({ namespace: { foo: true }}, false);
+});
+
+test('throws error on invalid observer on withStore', () => {
+    expect(() => {
+        withStore('namespace', { bla: {}});
+    }).toThrow();
 });
 
 test('update store', () => {
@@ -118,7 +134,7 @@ test('manual subscribe and unsubscribe', (done) => {
     Store.update('namespace', change);
 });
 
-test('test withStore', () => {
+test('test withStore for React.Component observer', () => {
     Store.init({ namespace: { foo: "bar" }}, true);
     const TestComp = withStore('namespace', Component);
     expect(TestComp).toEqual(expect.any(Function));
@@ -126,7 +142,6 @@ test('test withStore', () => {
 
 test('render withStore', () => {
     Store.init({ namespace: { foo: "bar" }}, true);
-    const TestCompEmpty = withStore('empty', Component)
     const TestComp = withStore('namespace', Component)
     const wrapper = mount(<TestComp />);
     wrapper.unmount();

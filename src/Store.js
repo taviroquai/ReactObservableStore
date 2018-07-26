@@ -1,7 +1,7 @@
-import set from 'lodash.set';
-import get from 'lodash.get';
-import assign from 'lodash.assign';
-import clone from 'lodash.clonedeep';
+import set from 'lodash-es/set';
+import get from 'lodash-es/get';
+import assign from 'lodash-es/assign';
+import clone from 'lodash-es/cloneDeep';
 
 /**
  * The global state store
@@ -57,6 +57,15 @@ class Store {
         this.showLog = log;
         if (!data) throw new Error('Invalid store initialization');
         this.storage = assign({}, Store.sanitizeData(data));
+        this.logging();
+    }
+
+    /**
+     * Check if namespace exists
+     * @param {String} namespace 
+     */
+    isValidNamespace(namespace) {
+        return !!this.storage[namespace];
     }
 
     /**
@@ -67,7 +76,6 @@ class Store {
      * @param {Boolean} merge       The update method: merge or override
      */
     update(namespace, data, merge = true) {
-        if (!this.storage[namespace]) throw new Error('Invalid namespace');
         const update = merge ? this.storage[namespace] : {};
         this.storage[namespace] = assign(update, Store.sanitizeData(data));
         this.logging();

@@ -1,1 +1,8 @@
 .babelrc
+.travis.yml
+coverage
+dist
+example
+example-browser
+rollup.config.js
+webpack.config.js

@@ -1,42 +1,51 @@
-// We are using node's native package 'path'
-// https://nodejs.org/api/path.html
 const path = require('path');
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const htmlPlugin = new HtmlWebPackPlugin({
+  template: "./example/index.html",
+  filename: "./index.html"
+});
 
-// Constant with our paths
-const paths = {
-  DIST: path.resolve(__dirname, 'dist'),
-  SRC: path.resolve(__dirname, 'example/src'),
-  JS: path.resolve(__dirname, 'example/src/js'),
+const babelRule = {
+  test: /\.js$/,
+  exclude: /node_modules/,
+  use: {
+    loader: "babel-loader"
+  }
 };
 
-// Webpack configuration
+const cssRule = {
+  test: /\.css$/,
+  use: ["style-loader", "css-loader"]
+};
+
+const fileRule = {
+  test: /\.(png|jpg|gif)$/,
+  use: [
+    {
+      loader: 'file-loader',
+      options: {}
+    }
+  ]
+};
+
+const rules = [];
+rules.push(babelRule);
+rules.push(cssRule);
+rules.push(fileRule);
+
+const plugins = [];
+plugins.push(htmlPlugin);
+
 module.exports = {
-  entry: path.join(paths.JS, 'index.js'),
-  output: {
-    path: paths.DIST,
-    filename: 'app.bundle.js'
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.join(paths.SRC, 'index.html'),
-    }),
-  ],
+  entry: './example/index.js',
   module: {
-    rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: [
-          'babel-loader',
-        ],
-      },
-    ],
+    rules: rules
   },
-  // So we can write: import MyComponent from './my-component';
-  // Instead of: import MyComponent from './my-component.jsx';
-  resolve: {
-    extensions: ['.js', '.jsx'],
-  },
+  plugins: plugins,
+  devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    compress: false,
+    port: 9000
+  }
 };
