@@ -57,16 +57,12 @@ class ReactStore {
      */
     init(data, log = false) {
         this.store.init(data, log);
-        console.log('INIT', data);
         for (let namespace in data) this.strategy.init(namespace);
     }
 
     add(namespace, data) {
-        console.log('ADD', namespace, data);
         this.store.add(namespace, data);
         this.strategy.init(namespace);
-        console.log('ADD DONE', this.store.storage);
-        //this.strategy.update(namespace, this.store.get(namespace));
     }
 
     /**
