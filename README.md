@@ -9,15 +9,14 @@ This module uses the Observer Pattern: components subscribe to store updates.
 
 ## Demo & Examples
 
-To build the examples locally, run:
+To build and run the example locally, run:
 
 ```
 npm install
-npm run dev
+npm run start
 ```
 
-Then open [`localhost:8081`](http://localhost:8081) in a browser.
-
+It will open [`localhost:9000`](http://localhost:9000) in a browser.
 
 ## Installation
 
@@ -25,9 +24,7 @@ Then open [`localhost:8081`](http://localhost:8081) in a browser.
 npm install react-observable-store --save
 ```
 
-You can also use the standalone build by including `dist/react-observable-store.js` in your page. If you use this, make sure you have already included React, and it is available as a global variable.
-
-## Usage
+## Usage in Node
 
 **Initialize (ES6) in top level component (or index.js)**  
 ```
@@ -72,11 +69,28 @@ export const updateFoo = (input) => {
 };
 ```
 
-## Development (`src`, `lib` and the build process)
+## Usage in Browser
 
-**NOTE:** The source code for the component is in `src`. A transpiled CommonJS version (generated with Gulp+Babel) is available in `lib` for use with node.js, browserify and webpack. The example bundle is also built to `dist`.
+Please see [example-browser/index.html](https://github.com/taviroquai/ReactObservableStore/blob/v2-dev/example-browser/index.html) about how to use in browser.
 
-To build, watch and serve the examples (which will also watch the component source), run `npm run build`. If you just want to watch changes to `src` and rebuild `lib`, run `npm run watch`.
+Note: include the following line after including UMD React/ReactDOM and before the UMD build lib/index.js
+
+```
+<script>var process = { env: { NODE_ENV: null } }</script>
+```
+
+TODO: improve browser usage
+
+## Development and the Build Process
+
+Currently the development setup uses `babel`, `webpack`, `rollup`, `jest` and `enzyme`.
+
+1. Babel for the obvious reasons
+2. webpack for the hotreload example
+3. rollup for the building process
+4. jest + enzyme for the tests
+
+To build, watch and serve the examples (which will also watch the component source), run `npm run start`.
 
 ## License
 
