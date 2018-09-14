@@ -59,6 +59,12 @@ class Store {
         this.storage = assign({}, Store.sanitizeData(data));
     }
 
+    add(namespace, data) {
+        if (this.storage[namespace]) throw new Error('Namespace exists');
+        this.storage[namespace] = assign({}, Store.sanitizeData(data[namespace]));
+        this.logging();
+    }
+
     /**
      * Method to update the storage data
      *

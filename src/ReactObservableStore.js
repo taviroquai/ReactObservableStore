@@ -60,6 +60,11 @@ class ReactStore {
         for (let namespace in data) this.strategy.init(namespace);
     }
 
+    add(namespace, data) {
+        this.store.add(namespace, data);
+        this.strategy.init(namespace);
+    }
+
     /**
      * Updates the store
      *
