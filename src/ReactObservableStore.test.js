@@ -146,3 +146,29 @@ test('self update', () => {
     const wrapper = mount(<TestComp />);
     expect(wrapper.find('div').text()).toEqual('self update');
 });
+
+test('add namespace fails with wrong data', () => {
+    Store.init({ namespace: { foo: true }});
+    var result = Store.get('other');
+    expect(result).toBe(null);
+    expect(() => {
+        Store.add('other', { foo: true });
+    }).toThrow();
+});
+
+test('add namespace to store succeeds', () => {
+    Store.init({ namespace: { foo: true }});
+    var result = Store.get('other');
+    expect(result).toBe(null);
+    const expected = { foo: true };
+    Store.add('other', { other: expected });
+    var result = Store.get('other');
+    expect(result).toEqual(expected);
+});
+
+test('add duplicated namespace fails', () => {
+    Store.init({ namespace: { foo: true }});
+    expect(() => {
+        Store.add('namespace', { foo: true });
+    }).toThrow();
+});
