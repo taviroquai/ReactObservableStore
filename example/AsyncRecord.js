@@ -12,7 +12,7 @@ class AsyncRecord extends React.Component {
 
 		// Manually subscribe to Store. See unsubscribe bellow!
 		this.state = {};
-		this.observer_id = Store.subscribe('record', (state) => {
+		this.unsubscribe = Store.subscribe('record', (state) => {
 			this.setState(state);
 		}, this);
 		
@@ -34,7 +34,7 @@ class AsyncRecord extends React.Component {
 	componentWillUnmount() {
 
 		// Manually unsubscribe on will mount - MANDATORY!
-		Store.unsubscribe('record', this.observer_id);
+		Store.unsubscribe();
 	}
 
 	render () {

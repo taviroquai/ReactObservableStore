@@ -69,6 +69,19 @@ class Store {
     }
 
     /**
+     * Adds namespace to store
+     * 
+     * @param {String} namespace 
+     * @param {Object} data 
+     */
+    add(namespace, data) {
+        if (this.storage[namespace]) throw new Error('Namespace exists');
+        if (!data[namespace]) throw new Error('Data expects the key: ' + namespace);
+        this.storage[namespace] = assign({}, Store.sanitizeData(data[namespace]));
+        this.logging();
+    }
+
+    /**
      * Method to update the storage data
      *
      * @param {String} namespace    The namespace

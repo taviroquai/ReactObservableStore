@@ -73,6 +73,17 @@ class ReactStore {
     }
 
     /**
+     * Adds namespace after store has been initailized
+     * 
+     * @param {String} namespace 
+     * @param {Object} data 
+     */
+    add(namespace, data) {
+        this.store.add(namespace, data);
+        this.strategy.init(namespace);
+    }
+
+    /**
      * Updates the store
      *
      * @param  {String}  namespace    The namespace to update
@@ -82,8 +93,7 @@ class ReactStore {
     update(namespace, data, merge = true) {
         if (!this.store.isValidNamespace(namespace)) throw new Error('Invalid namespace');
         this.store.update(namespace, data, merge);
-        const updatedData = this.store.get(namespace);
-        this.strategy.update(namespace, updatedData);
+        this.strategy.update(namespace, this.store.get(namespace));
     }
 
     /**
@@ -132,12 +142,12 @@ class ReactStore {
     /**
      * Creates a wrapper around the component that will receive the storage data
      *
-     * @param  {String}     namespace   The namespace to subscribe for updates
-     * @param  {Component}  listener    The listener that will receive updates
-     * @return {Component|unsubscriber} The result
+     * @param  {String|Array}   namespaces  The namespace to subscribe for updates
+     * @param  {Component}      listener    The listener that will receive updates
+     * @return {Component|unsubscriber}     The result
      */
-    withStore(namespace, listener) {
-        return instance.strategy.register(namespace, instance.store, listener);
+    withStore(namespaces, listener) {
+        return instance.strategy.register(namespaces, instance.store, listener);
     }
 }
 

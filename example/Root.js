@@ -9,7 +9,9 @@ class Root extends React.Component {
 			<Router>
 				<Switch>
 					<Route exact path="/" component={App} />
-					<Route path="/record/:param" render={(props) => <AsyncRecord foo="bar" {...props} />} />
+					<Route path="/record/:param" render={(props) => 
+						<AsyncRecord foo="bar" {...props} />
+					} />
 				</Switch>
 			</Router>
 		)

@@ -18,44 +18,81 @@ class ObserverComponent extends React.Component {
         // Track isMounted locally
         this._isMounted = false;
 
+        // Normalize namespaces to array
+        this.namespaces = typeof props.namespaces === 'string' ? 
+            [props.namespaces]
+            : props.namespaces;
+
         // Queue for batch updates
-        this._queue = [];
+        this._queue = {};
+        this.namespaces.forEach(ns => this._queue[ns] = []);
 
-        // Set initial state
-        this.state = assign({}, props.store.get(props.namespace));
+        // Initialize state
+        this.state = this.getInitialState(props.store);
 
-        // Subscribe to store
-        const me = this;
-        me.id = props.subscribe(props.namespace, function upd(data) {
-            me.update(data);
+        // Subscribe to store namespaces
+        this.unsubscribers = [];
+        this.subscribeArray(props.subscribe);
+    }
+
+    /**
+     * Initialize state
+     * 
+     * Map store namespaces to local state
+     * 
+     * @param {Store} store The store holding namespace data
+     */
+    getInitialState(store) {
+        const state = {};
+        this.namespaces.map(ns => {
+            state[ns] = store.get(ns);
+        });
+        return assign({}, state);
+    }
+
+    /**
+     * Subscribe to multiple namespaces
+     * 
+     * @param {Function} subscribe The subscribe function
+     */
+    subscribeArray(subscribe) {
+        this.namespaces.forEach(ns => {
+            this.unsubscribers.push(subscribe(ns, data => {
+                this.update(ns, data);
+            }));
         });
     }
 
     /**
      * Update component state
-     * @param {Object}  data  The data to be updated
-     * @param {Boolean} merge Flag to merge with current state
+     * 
+     * @param {String}  namespace   The namespace to be updated
+     * @param {Object}  data        The data to be updated
      */
-    update(data) {
-        const newState = assign(this.state, data);
-        if (this._isMounted) this.setState(newState);
-        else this._queue.push(newState);
+    update(namespace, data) {
+        const nextState = assign(this.state, data);
+        if (this._isMounted) this.setState(nextState);
+        else this._queue[namespace].push(nextState);
     }
 
     /**
      * Flush pending updates in queue
      */
     flushUpdates() {
-        if (this._queue.length) {
-            var newState = {}
-            this._queue.map((state) => newState = assign(newState, state));
-            this._queue.splice(0, this._queue.length);
-            this.update(newState);
+        for (let ns in this._queue) {
+            if (this._queue[ns].length) {
+                let nextState = {};
+                this._queue[ns].map(state => nextState = assign(nextState, state));
+                this._queue[ns].splice(0, this._queue[ns].length);
+                this.update(ns, nextState);
+            }
         }
     }
 
     /**
      * On component did mount, set _isMounted
+     * Is necessary to track wether the component is mounted or not
+     * 
      * @return {Boolean} The react result
      */
     componentDidMount() {
@@ -64,22 +101,23 @@ class ObserverComponent extends React.Component {
     }
 
     /**
-     * Unsubscribe observers of components that will unmount
+     * Unsubscribe when component unmount
      */
     componentWillUnmount() {
         this._isMounted = false;
-        this.props.unsubscribe(this.props.namespace, this.id);
+        this.unsubscribers.forEach(fn => fn());
     }
 
     /**
      * Renders the wrapped component
+     * 
      * @return {String} The JSX string to be rendered by ReactDOM
      */
     render() {
-        var { store, namespace } = this.props;
-        var output = assign({}, this.props.input)
-        output = assign(output, store.get(namespace))
-        return this.props.render(output);
+        const { render, input  } = this.props;
+        let output = assign({}, input);
+        this.namespaces.forEach(ns => output[ns] = this.state[ns]);
+        return render(output);
     }
 };
 

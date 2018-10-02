@@ -9,6 +9,9 @@ Store.init({
         loading: false,
         title: 'Loading...'
     },
+    session: {
+        username: 'admin!'
+    },
     record: {
         param: null,
         data: null,

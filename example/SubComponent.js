@@ -45,8 +45,8 @@ class SubComponent extends React.Component {
 			this.setState((state, props) => {
 				let nextState = assign({}, state);
 				nextState.CdU = 'done';
-				nextState.title = state.CdU === 'done' ? props.title : state.title;
-				nextState.alldone = state.title === props.title ? 'yes!' : state.alldone;
+				nextState.title = state.CdU === 'done' ? props.app.title : state.title;
+				nextState.alldone = state.title === props.app.title ? 'yes!' : state.alldone;
 				return nextState;
 			});
 		}, 1500);
@@ -68,14 +68,17 @@ class SubComponent extends React.Component {
 	}
 	
  	render () {
-		const { title } = this.props;
+		const { app, session } = this.props;
 		return (
 			<div>
 				<p>
-					Read store props with <em>this.props.title</em>: {title}
+					Read store props with <em>this.props.app.title</em>: {app.title}
 				</p>
 				<p>
-					Read from anywhere with <em>Store.get('namespace.title')</em>: {Store.get('namespace.title')}
+					Read other store props with <em>this.props.session.username</em>: {session.username}
+				</p>
+				<p>
+					Read from anywhere with <em>Store.get('namespace.title')</em>: {Store.get('app.title')}
 				</p>
 				<p>
 					React Router Link example: <Link to="/record/id">click</Link>

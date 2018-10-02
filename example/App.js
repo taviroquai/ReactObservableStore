@@ -6,10 +6,10 @@ import { withRouter } from 'react-router-dom';
 
 class App extends React.Component {
 	render () {
-		const { loading } = this.props;
-		return loading !== false ? <Loading /> : <SubComponent {...this.props} />
+		const { app } = this.props;
+		return app.loading !== false ? <Loading /> : <SubComponent {...this.props} />
 	}
 }
 
 // withStore example for React.Component observer
-export default withRouter(withStore('app', App));
+export default withRouter(withStore(['app', 'session'], App));

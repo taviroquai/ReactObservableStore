@@ -40,7 +40,9 @@ class ObservableStrategy {
         if (!this.observers[namespace]) throw new Error('Invalid namespace to be subscribed');
         const id = ObservableStrategy.generateObserverId();
         this.observers[namespace][id] = fn;
-        return id;
+        return () => {
+            this.unsubscribe(namespace, id);
+        };
     }
 
     /**
@@ -79,12 +81,12 @@ class ObservableStrategy {
 
     /**
      * Register component observer
-     * @param  {String}             namespace   The namespace to be subscribed
+     * @param  {String}             namespaces  The namespace to be subscribed
      * @param  {Object}             store       The store containing the data
      * @param  {React.Component}    observer    The observer Component
      * @return {Function}                       The result
      */
-    register(namespace, store, WrappedComponent) {
+    register(namespaces, store, WrappedComponent) {
 
         if (!WrappedComponent || !this.isReactComponent(WrappedComponent)) {
             throw new Error('Invalid observer for React Observable Store');
@@ -105,7 +107,7 @@ class ObservableStrategy {
                 store={store}
                 subscribe={this.subscribe.bind(this)}
                 unsubscribe={this.unsubscribe.bind(this)}
-                namespace={namespace}
+                namespaces={namespaces}
                 render={(output) => <WrappedComponent {...output} />}
             />
         )
